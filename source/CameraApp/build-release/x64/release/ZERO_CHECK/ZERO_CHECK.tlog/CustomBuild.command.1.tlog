@@ -1,0 +1,10 @@
+^C:\USERS\ADMINISTRATOR\DOWNLOADS\SDKCANON-MAIN\SDKCANON-MAIN\CAMERAAPP\BUILD-RELEASE\CMAKEFILES\B75F0843AEBAE6B8F061A0EC5F0F3244\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/CameraApp -BC:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/cameraapp/build-release --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/cameraapp/build-release/CameraApp.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

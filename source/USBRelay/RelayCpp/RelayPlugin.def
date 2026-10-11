@@ -1,0 +1,10 @@
+LIBRARY RelayPlugin
+EXPORTS
+    Relay_Init
+    Relay_ListDevices
+    Relay_On
+    Relay_Off
+    Relay_OnAll
+    Relay_OffAll
+    Relay_GetStatus
+    Relay_Shutdown

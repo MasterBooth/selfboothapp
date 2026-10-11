@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\cameraapp\build-release\CMakeFiles\b75f0843aebae6b8f061a0ec5f0f3244\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{3F0F5F04-9EC5-3CFE-88FB-63C65D6193D7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

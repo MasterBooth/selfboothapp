@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\main_gui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Core\Types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Core\ErrorHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Core\EDSDKContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Core\CommandQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Event\EventTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Event\IEventListener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Event\EventDispatcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Camera\CameraState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Camera\CameraProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Camera\CameraManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Camera\CameraDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Capture\FileDownloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Capture\CaptureController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\LiveView\LiveViewController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Interface\ICameraCallback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\Interface\CameraFacade.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\UI\MainWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\UI\UIHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\UI\PropertyLabels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Administrator\Downloads\sdkcanon-main\sdkcanon-main\CameraApp\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{FF367B46-95F8-36B3-9277-E15F57D2C321}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{2D90415C-E4D1-3AC4-9A41-4F53901B20C7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

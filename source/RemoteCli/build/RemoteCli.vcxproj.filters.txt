@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CameraDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\ConnectionInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\PropertyValueTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\RemoteCli.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\MessageDefine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\OpenCVWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CrDebugString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CameraDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\ConnectionInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\PropertyValueTable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\Text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\MessageDefine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\OpenCVWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\CameraRemote_SDK.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\CrCommandData.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\CrDefines.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\CrDeviceProperty.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\CrError.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\CrImageDataBlock.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\CrTypes.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\ICrCameraObjectInfo.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CRSDK\IDeviceCallback.h">
+      <Filter>CRSDK</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CRSDK">
+      <UniqueIdentifier>{231E0F2A-5E13-37C2-B6BB-231DC2EB9F18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{289A635E-0F7F-32C3-87A1-060F2E91A919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{490ABCA9-1D33-325D-8537-82891BFDF0D8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

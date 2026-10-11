@@ -1,0 +1,5 @@
+C:/Users/Administrator/Desktop/sourcecode/sdkcanon-main/remotecli/build-release/CMakeFiles/RemoteCli.dir
+C:/Users/Administrator/Desktop/sourcecode/sdkcanon-main/remotecli/build-release/CMakeFiles/RemoteCliGUI.dir
+C:/Users/Administrator/Desktop/sourcecode/sdkcanon-main/remotecli/build-release/CMakeFiles/INSTALL.dir
+C:/Users/Administrator/Desktop/sourcecode/sdkcanon-main/remotecli/build-release/CMakeFiles/ALL_BUILD.dir
+C:/Users/Administrator/Desktop/sourcecode/sdkcanon-main/remotecli/build-release/CMakeFiles/ZERO_CHECK.dir

@@ -1,0 +1,36 @@
+# selfboothvn-api — API cho app desktop (và web sau này) trên D1 + R2 `selfboothvn`.
+# Hợp đồng API + schema: web/D1_REPORT.md
+#
+# Secret (đặt riêng, KHÔNG ghi vào file này):
+#   npx wrangler secret put API_TOKEN              # legacy bootstrap; not shipped in desktop
+#   npx wrangler secret put ADMIN_API_TOKEN        # route /v1/admin/*
+#   npx wrangler secret put UPLOAD_SIGNING_SECRET  # ký upload_url
+#
+# Migration D1:  npx wrangler d1 migrations apply selfboothvn --remote
+# Deploy:        npx wrangler deploy   (chạy trong thư mục này)
+# Cần gói Workers Paid: đăng nhập/đăng ký dùng PBKDF2 100 000 vòng (vượt 10ms CPU của gói Free).
+
+name = "selfboothvn-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+
+routes = [
+  { pattern = "boothme.tech/v1/*", zone_name = "boothme.tech" },
+  { pattern = "www.boothme.tech/v1/*", zone_name = "boothme.tech" }
+]
+
+# Khoá CÔNG KHAI xác minh giấy phép máy (không phải bí mật). Dán đúng dòng
+# "LICENSE_PUBLIC_KEYS = ..." mà app BOOTHME_ADMIN in ra sau khi tạo khoá ký.
+# Luân chuyển khoá: nối thêm "kid:hex" mới, cách nhau dấu phẩy, giữ kid cũ.
+[vars]
+LICENSE_PUBLIC_KEYS = "lm-2026-01:1b0a0d0283e1fe92ea42c5aae4d37e030eda7668c315c6e069af0e507f76ef62"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "selfboothvn"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "selfboothvn"
+database_id = "1d7d57db-5739-4810-b912-94339fb2968a"
+migrations_dir = "migrations"

@@ -1,0 +1,239 @@
+{
+  "studio": {
+    "id": "c9874a59-984d-4068-aee6-03ef210cb6ee",
+    "name": "BoothVN",
+    "timezone": "Asia/Bangkok",
+    "cta": "Đặt lịch",
+    "voice": "Editorial, ấm và rõ thao tác."
+  },
+  "admins": [
+    {
+      "id": "admin-owner",
+      "name": "Studio Owner",
+      "email": "owner@boothvn.local",
+      "role": "owner",
+      "status": "active",
+      "accessCode": "BOOTHVN-DEMO",
+      "permissions": [
+        "bookings:read",
+        "bookings:update",
+        "staff:manage",
+        "reports:read"
+      ]
+    },
+    {
+      "id": "admin-staff",
+      "name": "Nhân viên quầy",
+      "email": "staff@boothvn.local",
+      "role": "staff",
+      "status": "active",
+      "accessCode": "BOOTHVN-DEMO",
+      "permissions": [
+        "bookings:read",
+        "bookings:update"
+      ]
+    }
+  ],
+  "sessions": [],
+  "revenue": {
+    "summary": [
+      {
+        "label": "Doanh thu hôm nay",
+        "value": "6.450.000đ",
+        "delta": "+12%"
+      },
+      {
+        "label": "Lịch đã chốt",
+        "value": "18",
+        "delta": "+4 lịch"
+      },
+      {
+        "label": "Giá trị trung bình",
+        "value": "358.000đ",
+        "delta": "ổn định"
+      },
+      {
+        "label": "Ảnh đã bàn giao",
+        "value": "246",
+        "delta": "+31 ảnh"
+      }
+    ],
+    "daily": [
+      {
+        "label": "T2",
+        "value": 42
+      },
+      {
+        "label": "T3",
+        "value": 58
+      },
+      {
+        "label": "T4",
+        "value": 36
+      },
+      {
+        "label": "T5",
+        "value": 64
+      },
+      {
+        "label": "T6",
+        "value": 78
+      },
+      {
+        "label": "T7",
+        "value": 96
+      },
+      {
+        "label": "CN",
+        "value": 72
+      }
+    ],
+    "recentBookings": [
+      {
+        "customer": "Minh Anh",
+        "package": "Couple Film",
+        "branch": "Quận 1",
+        "amount": "490.000đ"
+      },
+      {
+        "customer": "Gia Hân",
+        "package": "Classic Booth",
+        "branch": "Thảo Điền",
+        "amount": "320.000đ"
+      },
+      {
+        "customer": "Studio Walk-in",
+        "package": "Sweet Hour",
+        "branch": "Quận 1",
+        "amount": "390.000đ"
+      }
+    ]
+  },
+  "gallery": [
+    {
+      "code": "SB-2401",
+      "customer": "Minh Anh",
+      "branch": "Quận 1",
+      "count": 42,
+      "status": "verified"
+    },
+    {
+      "code": "SB-2402",
+      "customer": "Gia Hân",
+      "branch": "Thảo Điền",
+      "count": 28,
+      "status": "uploaded"
+    },
+    {
+      "code": "SB-2403",
+      "customer": "Khách walk-in",
+      "branch": "Quận 1",
+      "count": 16,
+      "status": "partial"
+    },
+    {
+      "code": "SB-2404",
+      "customer": "Team Bloom",
+      "branch": "Phú Nhuận",
+      "count": 64,
+      "status": "verified"
+    },
+    {
+      "code": "SB-2405",
+      "customer": "Linh Chi",
+      "branch": "Thảo Điền",
+      "count": 22,
+      "status": "verified"
+    },
+    {
+      "code": "SB-2406",
+      "customer": "Bạn thân",
+      "branch": "Phú Nhuận",
+      "count": 36,
+      "status": "uploaded"
+    }
+  ],
+  "packages": [
+    {
+      "name": "Classic Booth",
+      "price": "320.000đ",
+      "duration": "30 phút",
+      "deliverables": "8 ảnh chỉnh màu",
+      "status": "Hiển thị"
+    },
+    {
+      "name": "Couple Film",
+      "price": "490.000đ",
+      "duration": "45 phút",
+      "deliverables": "12 ảnh + gif",
+      "status": "Hiển thị"
+    },
+    {
+      "name": "Studio Party",
+      "price": "790.000đ",
+      "duration": "70 phút",
+      "deliverables": "24 ảnh + layout in",
+      "status": "Nháp"
+    }
+  ],
+  "staff": [
+    {
+      "name": "Studio Owner",
+      "email": "owner@boothvn.local",
+      "role": "owner",
+      "permissions": [
+        "Tất cả quyền",
+        "Báo cáo",
+        "Thương hiệu"
+      ]
+    },
+    {
+      "name": "Nhân viên quầy",
+      "email": "staff@boothvn.local",
+      "role": "staff",
+      "permissions": [
+        "Xem lịch",
+        "Cập nhật lịch"
+      ]
+    },
+    {
+      "name": "Máy Booth 01",
+      "email": "machine-q1@boothvn.local",
+      "role": "machine",
+      "permissions": [
+        "Tạo phiên",
+        "Upload ảnh"
+      ]
+    }
+  ],
+  "branches": [
+    {
+      "name": "Quận 1",
+      "address": "Nguyễn Trãi, Q1",
+      "devices": [
+        {
+          "name": "Booth Q1-01",
+          "status": "online"
+        },
+        {
+          "name": "Booth Q1-02",
+          "status": "maintenance"
+        }
+      ]
+    },
+    {
+      "name": "Thảo Điền",
+      "address": "Xuân Thủy, TP Thủ Đức",
+      "devices": [
+        {
+          "name": "Booth TD-01",
+          "status": "online"
+        },
+        {
+          "name": "Upload Station TD",
+          "status": "online"
+        }
+      ]
+    }
+  ]
+}

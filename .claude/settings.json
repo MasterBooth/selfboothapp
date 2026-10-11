@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/82a51a00-4f1c-467f-a522-3049e694bda6/scratchpad/e2e/node_modules/.bin/wrangler d1 *)",
+      "Bash(/c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/82a51a00-4f1c-467f-a522-3049e694bda6/scratchpad/e2e/node_modules/.bin/wrangler deploy *)",
+      "Bash(/c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/82a51a00-4f1c-467f-a522-3049e694bda6/scratchpad/e2e/node_modules/.bin/wrangler secret *)",
+      "Bash(python -)",
+      "Bash(/c/Qt/6.10.3/msvc2022_64/bin/qmllint.exe Main.qml)",
+      "Bash(/c/Qt/6.10.3/msvc2022_64/bin/qmllint.exe Main.qml MachineDetail.qml MachinesPage.qml KeyPage.qml ServerPage.qml Btn.qml Chip.qml Field.qml SideItem.qml StatusPill.qml Tk.qml)",
+      "PowerShell($exe = \"C:\\\\Users\\\\ASUS\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-ASUS-Desktop-selfbooth\\\\82a51a00-4f1c-467f-a522-3049e694bda6\\\\scratchpad\\\\build_admin\\\\bin\\\\Release\\\\BOOTHME_ADMIN.exe\"; $env:QT_FORCE_STDERR_LOGGING = \"1\"; $p = Start-Process -FilePath $exe -RedirectStandardError \"$env:TEMP\\\\admrun.err\" -RedirectStandardOutput \"$env:TEMP\\\\admrun.out\" -PassThru -WindowStyle Minimized; Start-Sleep -Seconds 5; $alive = -not $p.HasExited; if \\($alive\\) { Stop-Process -Id $p.Id -Force }; \"still running after 5s: $alive\"; Get-Content \"$env:TEMP\\\\admrun.err\" | Select-Object -First 20)",
+      "PowerShell($src = \"C:\\\\Users\\\\ASUS\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-ASUS-Desktop-selfbooth\\\\82a51a00-4f1c-467f-a522-3049e694bda6\\\\scratchpad\\\\build_admin\\\\bin\\\\Release\"; $dst = \"C:\\\\Users\\\\ASUS\\\\Desktop\\\\selfbooth\\\\source\\\\main\\\\build_admin\\\\bin\\\\Release\"; robocopy $src $dst /E /NJH /NJS /NDL /NP | Where-Object { $_ -match \"\\\\S\" } | Select-Object -First 15; Get-Item \"$dst\\\\BOOTHME_ADMIN.exe\" | Select-Object Name, LastWriteTime; Test-Path \"$dst\\\\admin-config.json\"; Test-Path \"$dst\\\\qml\\\\QtCore\")",
+      "Read(//c/Program Files \\\\\\(x86\\\\\\)/Inno Setup 6/Languages//**)",
+      "Bash(\"/c/Program Files \\(x86\\)/Inno Setup 6/ISCC.exe\")",
+      "Bash(\"/c/Program Files \\(x86\\)/Inno Setup 6/ISCC.exe\" admin_installer.iss)",
+      "Bash(npm run *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://boothme.tech/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://www.boothme.tech/)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s \"https://boothme.tech/v1/web/frames?limit=2\")",
+      "Bash(curl -s \"https://boothme.tech/v1/web/capture-sessions/1babcd72-b492-4483-909f-a3109459f33d/session_20261002_173850_8606/assets?limit=3\")",
+      "Bash(curl -s -D - \"https://boothme.tech/compose/photos?x=1\")",
+      "Bash(curl -s \"https://boothme.tech/compose/photos?x=1\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} \" \"https://boothme.tech/compose/photos\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://www.boothme.tech/compose/photos\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} \" \"https://www.boothme.tech/compose/photos\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://www.boothme.tech/compose/frames\")",
+      "Bash(curl -s \"https://boothme.tech/compose/photos?frame_id=x\")",
+      "Bash(curl -s \"https://boothme.tech/compose/photos?v=2\")",
+      "Bash(python /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_css.py app/globals.css /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_mobile.css)",
+      "Bash(npx wrangler *)",
+      "Bash(echo \"exit $?\")",
+      "Bash(python /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_filters.py app/page.tsx /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_filters_handlers.tsx /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_filters_section.tsx)",
+      "Bash(git -C /c/Users/ASUS/Desktop/selfbooth show HEAD:web/admin/app/globals.css)"
+    ],
+    "additionalDirectories": [
+      "\\tmp"
+    ]
+  }
+}

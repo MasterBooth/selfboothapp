@@ -1,0 +1,18 @@
+{
+    "r2_settings": {
+        "bucket_name": "selfboothvn",
+        "account_id": "auto",
+        "public_base_url": "https://boothme.tech/media"
+    },
+    "cloud_api": {
+        "base_url": "https://boothme.tech"
+    },
+    "web": {
+        "gallery_base_url": ""
+    },
+    "machine_settings": {
+        "device_name": "Boothme",
+        "auto_retry": true,
+        "max_retries": 3
+    }
+}

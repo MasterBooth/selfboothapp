@@ -1,0 +1,18 @@
+[13:26:04.701] === RemoteCliGUI session start ===
+[13:26:14.744] Enumerating cameras (2s)...
+[13:26:16.936] Found 1 camera(s).
+[13:26:20.617] Connecting to ILCE-7C ()...
+[13:26:20.621] Connected successfully.
+[13:26:20.621] EnableLiveView: OK
+[13:26:20.621] EnablePostView: FAILED
+[13:26:20.621] PostViewTransferringType Legacy: FAILED
+[13:26:20.622] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[13:26:20.622] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[13:26:20.622] Save path set: C:\Users\Administrator\Pictures
+[13:26:20.696] OnConnected callback.
+[13:26:22.247] Warning: 0x2006e
+[13:26:28.074] Set property F3,5
+[13:27:20.736] Disconnecting...
+[13:27:20.746] Camera disconnected (code=0x0).
+[13:27:20.747] Disconnected.
+[13:27:20.747] === RemoteCliGUI session end ===

@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "selfboothvn-admin",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "vinext/server/app-router-entry",
+  "preview_urls": true,
+  "routes": [
+    {
+      "pattern": "boothme.tech/*",
+      "zone_name": "boothme.tech"
+    },
+    {
+      "pattern": "www.boothme.tech/*",
+      "zone_name": "boothme.tech"
+    }
+  ],
+  "assets": {
+    "not_found_handling": "none"
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.05
+    }
+  }
+}

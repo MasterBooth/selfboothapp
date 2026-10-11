@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lấy ảnh gốc — Quầy thu ngân</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --panel2:#1f2530; --line:#2a3140; --text:#e7ebf1; --muted:#9aa4b2; --accent:#ec4899; --ok:#22c55e; --warn:#f0a020; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Segoe UI, system-ui, Arial, sans-serif; background:var(--bg); color:var(--text); height:100vh; overflow:hidden; }
+  button, input { font-family:inherit; }
+  button { cursor:pointer; }
+  .hidden { display:none !important; }
+
+  .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:50; }
+  .box { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:26px 24px; width:420px; max-width:92vw; }
+  .box h1 { font-size:19px; margin:0 0 4px; }
+  .box p { color:var(--muted); font-size:13px; margin:0 0 16px; }
+  .fld { width:100%; padding:12px; font-size:15px; border-radius:10px; border:1px solid var(--line); background:var(--panel2); color:var(--text); }
+  #pin { text-align:center; letter-spacing:6px; font-size:22px; }
+  .primary { margin-top:14px; width:100%; padding:12px; border:0; border-radius:10px; background:var(--accent); color:#fff; font-size:16px; font-weight:600; }
+  .err { color:#f87171; font-size:13px; min-height:18px; margin-top:8px; }
+  .link { background:none; border:0; color:var(--muted); text-decoration:underline; font-size:13px; padding:6px 0; }
+
+  header { display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid var(--line); background:var(--panel); }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  header .sp { flex:1; }
+  .btn { background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 12px; font-size:14px; font-weight:600; }
+  .btn.accent { background:var(--accent); border-color:var(--accent); color:#fff; }
+  main { display:flex; height:calc(100vh - 53px); }
+  #sessions { width:340px; border-right:1px solid var(--line); overflow-y:auto; background:var(--panel); }
+  .sess { display:flex; gap:10px; padding:10px 14px; border-bottom:1px solid var(--line); cursor:pointer; align-items:center; }
+  .sess:hover { background:var(--panel2); }
+  .sess.active { background:var(--panel2); border-left:3px solid var(--accent); }
+  .sess img { width:64px; height:48px; object-fit:cover; border-radius:6px; background:#000; flex:none; }
+  .sess .meta { min-width:0; flex:1; }
+  .sess .t { font-size:13px; font-weight:600; }
+  .sess .c { font-size:12px; color:var(--muted); }
+  .badge { display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:5px; background:#334155; color:#cbd5e1; margin-bottom:2px; }
+  #detail { flex:1; display:flex; flex-direction:column; min-width:0; }
+  #detailBar { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); }
+  #detailBar .title { font-weight:600; }
+  #detailBar .sp { flex:1; }
+  #grid { flex:1; overflow-y:auto; padding:16px; display:grid; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); gap:14px; align-content:start; }
+  .cell { position:relative; }
+  .cell img { width:100%; aspect-ratio:3/2; object-fit:cover; border-radius:8px; background:#000; display:block; }
+  .cell .n { position:absolute; top:6px; left:6px; background:rgba(0,0,0,.6); color:#fff; font-size:12px; padding:2px 7px; border-radius:5px; }
+  .empty { color:var(--muted); padding:40px; text-align:center; width:100%; }
+  .toast { position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:var(--ok); color:#062; padding:10px 18px; border-radius:8px; font-weight:600; opacity:0; transition:opacity .2s; z-index:60; }
+  .toast.show { opacity:1; }
+
+  /* Booth config */
+  .boothRow { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+  .boothRow input { flex:1; padding:9px; border-radius:8px; border:1px solid var(--line); background:var(--panel2); color:var(--text); font-size:13px; }
+  .boothRow .del { background:#3a2330; border:1px solid #5b2a3d; color:#f8a; border-radius:8px; padding:8px 10px; }
+  .dot { width:9px; height:9px; border-radius:50%; flex:none; }
+  .dot.on { background:var(--ok); } .dot.off { background:#64748b; } .dot.err { background:#ef4444; }
+</style>
+</head>
+<body>
+  <!-- Login -->
+  <div id="login" class="modal">
+    <div class="box">
+      <h1>Lấy ảnh gốc</h1>
+      <p>Nhập mã PIN (dùng chung cho các booth)</p>
+      <input id="pin" class="fld" type="password" inputmode="numeric" autocomplete="off" placeholder="••••" />
+      <div id="loginErr" class="err"></div>
+      <button id="loginBtn" class="primary">Vào</button>
+      <div style="text-align:center"><button id="openCfgFromLogin" class="link">⚙ Cấu hình danh sách booth</button></div>
+    </div>
+  </div>
+
+  <!-- Booth config -->
+  <div id="cfg" class="modal hidden">
+    <div class="box">
+      <h1>Danh sách booth</h1>
+      <p>Thêm các máy booth trong LAN (tên + địa chỉ IP). Cổng mặc định 5514.</p>
+      <div id="boothList"></div>
+      <button id="addBooth" class="btn" style="margin-top:6px">+ Thêm booth</button>
+      <button id="saveCfg" class="primary">Lưu</button>
+      <div style="text-align:center"><button id="closeCfg" class="link">Đóng</button></div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="hidden">
+    <header>
+      <h1>📸 Ảnh gốc — tất cả booth</h1>
+      <div class="sp"></div>
+      <button class="btn" id="cfgBtn">⚙ Booth</button>
+      <button class="btn" id="refreshBtn">↻ Làm mới</button>
+    </header>
+    <main>
+      <div id="sessions"></div>
+      <div id="detail">
+        <div id="detailBar">
+          <span class="title" id="detailTitle">Chọn một session</span>
+          <span class="sp"></span>
+          <button class="btn accent hidden" id="dlAllBtn">⬇ Tải tất cả</button>
+        </div>
+        <div id="grid"><div class="empty">Chọn một session bên trái để xem ảnh gốc.</div></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var PORT = 5514;
+  var token   = localStorage.getItem("pickupToken") || "";
+  var booths  = loadBooths();          // [{name, host}]
+  var merged  = [];                    // session gộp mọi booth
+  var current = null;                  // {booth, sessionId}
+  var currentPhotos = [];
+  var esList = [], pollTimer = null, reloadTimer = null;
+
+  function el(id){ return document.getElementById(id); }
+  function toast(m){ var t=el("toast"); t.textContent=m; t.classList.add("show"); setTimeout(function(){t.classList.remove("show");},1800); }
+  function base(host){ return "http://" + host + ":" + PORT; }
+  function withTok(url){ return url + (url.indexOf("?")>=0?"&":"?") + "token=" + encodeURIComponent(token); }
+  function fileUrl(host, p){ return withTok(base(host) + "/api/file?path=" + encodeURIComponent(p)); }
+  function baseName(p){ return (p||"").split(/[\\/]/).pop(); }
+
+  function loadBooths(){
+    try { var b = JSON.parse(localStorage.getItem("pickupBooths")||"[]"); if(b.length) return b; } catch(e){}
+    // Mặc định: máy đang phục vụ trang này.
+    return [{ name:"Booth 1", host: location.hostname }];
+  }
+  function saveBooths(){ localStorage.setItem("pickupBooths", JSON.stringify(booths)); }
+
+  function api(host, path){
+    return fetch(withTok(base(host)+path)).then(function(r){
+      if(r.status===401) throw new Error("unauthorized");
+      return r.json();
+    });
+  }
+
+  // ── Auth (PIN chung) ─────────────────────────────────────────────────────
+  function anyHost(){ return booths.length ? booths[0].host : location.hostname; }
+  function checkAuth(host, t){
+    return fetch(base(host)+"/api/pickup/auth?token="+encodeURIComponent(t)).then(function(r){return r.json();});
+  }
+  function showLogin(){ el("app").classList.add("hidden"); el("login").classList.remove("hidden"); }
+  function logout(){ token=""; localStorage.removeItem("pickupToken"); showLogin(); }
+  function doLogin(){
+    var t = el("pin").value.trim();
+    checkAuth(anyHost(), t).then(function(res){
+      if(res && res.ok){ token=t; localStorage.setItem("pickupToken",t); el("login").classList.add("hidden"); el("app").classList.remove("hidden"); start(); }
+      else { el("loginErr").textContent="Sai mã PIN"; }
+    }).catch(function(){ el("loginErr").textContent="Không kết nối được booth "+anyHost(); });
+  }
+  el("loginBtn").onclick = doLogin;
+  el("pin").addEventListener("keydown", function(e){ if(e.key==="Enter") doLogin(); });
+
+  // ── Booth config ──────────────────────────────────────────────────────────
+  function renderBoothCfg(){
+    var box = el("boothList"); box.innerHTML="";
+    booths.forEach(function(b,i){
+      var row=document.createElement("div"); row.className="boothRow";
+      row.innerHTML = '<input placeholder="Tên" value="'+(b.name||"")+'" data-i="'+i+'" data-k="name">'
+                    + '<input placeholder="IP (vd 192.168.1.6)" value="'+(b.host||"")+'" data-i="'+i+'" data-k="host">';
+      var del=document.createElement("button"); del.className="del"; del.textContent="✕";
+      del.onclick=function(){ booths.splice(i,1); renderBoothCfg(); };
+      row.appendChild(del); box.appendChild(row);
+    });
+    box.querySelectorAll("input").forEach(function(inp){
+      inp.oninput=function(){ booths[+inp.dataset.i][inp.dataset.k]=inp.value.trim(); };
+    });
+  }
+  function openCfg(){ renderBoothCfg(); el("cfg").classList.remove("hidden"); }
+  el("addBooth").onclick=function(){ booths.push({name:"Booth "+(booths.length+1), host:""}); renderBoothCfg(); };
+  el("saveCfg").onclick=function(){
+    booths = booths.filter(function(b){ return b.host; });
+    if(!booths.length) booths=[{name:"Booth 1", host:location.hostname}];
+    saveBooths(); el("cfg").classList.add("hidden");
+    if(!el("app").classList.contains("hidden")) start();
+  };
+  el("closeCfg").onclick=function(){ el("cfg").classList.add("hidden"); };
+  el("cfgBtn").onclick=openCfg;
+  el("openCfgFromLogin").onclick=openCfg;
+
+  // ── Nạp session gộp mọi booth ──────────────────────────────────────────────
+  function boothSessions(b){
+    return api(b.host, "/api/events").then(function(ev){
+      var events = (ev && ev.events) || [];
+      // Gộp session của mọi event trong booth (thường 1 event đang chạy).
+      var jobs = events.map(function(e){
+        return api(b.host, "/api/events/"+e.id+"/sessions")
+          .then(function(d){ return ((d&&d.sessions)||[]).map(function(s){ s._booth=b; return s; }); })
+          .catch(function(){ return []; });
+      });
+      return Promise.all(jobs).then(function(arrs){ b._ok=true; return [].concat.apply([], arrs); });
+    }).catch(function(){ b._ok=false; return []; });
+  }
+  function loadAll(){
+    return Promise.all(booths.map(boothSessions)).then(function(arrs){
+      merged = [].concat.apply([], arrs);
+      merged.sort(function(a,b){ return (b.startedAt||"").localeCompare(a.startedAt||""); });
+      if(merged.length>300) merged = merged.slice(0,300);
+      renderSessions();
+    });
+  }
+  function fmtTime(s){ if(!s) return ""; var d=new Date(s); if(isNaN(d)) return s; return d.toLocaleString(); }
+  function renderSessions(){
+    var box=el("sessions"); box.innerHTML="";
+    if(!merged.length){ box.innerHTML='<div class="empty">Chưa có session nào. Kiểm tra danh sách booth (⚙).</div>'; return; }
+    merged.forEach(function(s){
+      var b=s._booth;
+      var active = current && current.sessionId===s.sessionId && current.booth.host===b.host;
+      var div=document.createElement("div"); div.className="sess"+(active?" active":"");
+      var img = s.firstPhoto ? '<img loading="lazy" src="'+fileUrl(b.host, s.firstPhoto)+'">' : '';
+      div.innerHTML = img + '<div class="meta"><span class="badge">'+(b.name||b.host)+'</span>'
+                    + '<div class="t">'+fmtTime(s.startedAt)+'</div><div class="c">'+s.photoCount+' ảnh</div></div>';
+      div.onclick=function(){ openSession(b, s.sessionId); };
+      box.appendChild(div);
+    });
+  }
+
+  // ── Ảnh của 1 session ──────────────────────────────────────────────────────
+  function openSession(booth, sid){
+    current = { booth: booth, sessionId: sid }; renderSessions();
+    el("detailTitle").textContent = "Đang tải…";
+    api(booth.host, "/api/sessions/"+encodeURIComponent(sid)+"/photos").then(function(d){
+      currentPhotos = (d && d.photos) || [];
+      renderPhotos();
+    }).catch(function(){ el("detailTitle").textContent="Lỗi tải ảnh (booth offline?)"; });
+  }
+  function renderPhotos(){
+    var host = current.booth.host;
+    el("detailTitle").textContent = (current.booth.name||host) + " — " + currentPhotos.length + " ảnh gốc";
+    el("dlAllBtn").classList.toggle("hidden", currentPhotos.length===0);
+    var grid=el("grid"); grid.innerHTML="";
+    if(!currentPhotos.length){ grid.innerHTML='<div class="empty">Session này chưa có ảnh gốc.</div>'; return; }
+    currentPhotos.forEach(function(p,i){
+      var cell=document.createElement("div"); cell.className="cell";
+      var a=document.createElement("a"); a.href=fileUrl(host,p); a.download=baseName(p); a.target="_blank";
+      var img=document.createElement("img"); img.loading="lazy"; img.src=fileUrl(host,p);
+      a.appendChild(img); cell.appendChild(a);
+      var n=document.createElement("div"); n.className="n"; n.textContent=(i+1); cell.appendChild(n);
+      grid.appendChild(cell);
+    });
+  }
+  el("dlAllBtn").onclick=function(){
+    if(!current || !currentPhotos.length) return;
+    var host=current.booth.host;
+    currentPhotos.forEach(function(p,i){
+      setTimeout(function(){
+        var a=document.createElement("a"); a.href=fileUrl(host,p); a.download=baseName(p);
+        document.body.appendChild(a); a.click(); a.remove();
+      }, i*400);
+    });
+    toast("Đang tải "+currentPhotos.length+" ảnh gốc…");
+  };
+  el("refreshBtn").onclick=function(){ loadAll(); if(current) openSession(current.booth, current.sessionId); };
+
+  // ── Realtime (SSE mỗi booth) + polling ─────────────────────────────────────
+  function scheduleReload(){ clearTimeout(reloadTimer); reloadTimer=setTimeout(function(){ loadAll(); if(current) openSession(current.booth,current.sessionId); }, 600); }
+  function connectStreams(){
+    esList.forEach(function(es){ try{es.close();}catch(e){} }); esList=[];
+    booths.forEach(function(b){
+      try {
+        var es=new EventSource(withTok(base(b.host)+"/api/stream"));
+        es.onmessage=function(ev){ var m; try{m=JSON.parse(ev.data);}catch(e){return;} if(m && m.type==="imageCaptured") scheduleReload(); };
+        esList.push(es);
+      } catch(e){}
+    });
+  }
+  function startPolling(){ if(pollTimer) clearInterval(pollTimer); pollTimer=setInterval(loadAll, 6000); }
+
+  function start(){ loadAll().then(function(){ connectStreams(); startPolling(); }); }
+
+  // Auto-login nếu đã có token hợp lệ
+  if(token){ checkAuth(anyHost(), token).then(function(res){
+      if(res && res.ok){ el("login").classList.add("hidden"); el("app").classList.remove("hidden"); start(); }
+      else { showLogin(); }
+    }).catch(showLogin); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+[22:56:00.535] === Capture log start ===
+[22:56:38.315] CAPTURE START - shutter down
+[22:56:38.351] CAPTURE SHUTTER UP
+[22:57:47.828] CAPTURE START - shutter down
+[22:57:47.863] CAPTURE SHUTTER UP
+[22:57:56.665] === Capture log end ===
+[23:01:36.767] === Capture log start ===
+[23:02:21.715] CAPTURE START - shutter down
+[23:02:21.750] CAPTURE SHUTTER UP
+[23:02:24.660] CAPTURE START - shutter down
+[23:02:24.696] CAPTURE SHUTTER UP
+[23:02:30.366] === Capture log end ===
+[23:12:17.747] === Capture log start ===
+[23:12:32.466] === Download starting ===
+[23:12:35.002] Download: GetContentsInfoList failed 0x8402 nums=0
+[23:12:35.540] === Download finished: 0 file(s) saved ===
+[23:13:22.549] CAPTURE START - shutter down
+[23:13:22.585] CAPTURE SHUTTER UP
+[23:13:24.546] === Download starting ===
+[23:13:27.098] Download: GetContentsInfoList failed 0x8402 nums=0
+[23:13:27.634] === Download finished: 0 file(s) saved ===
+[23:13:29.732] === Capture log end ===
+[23:16:31.193] === Capture log start ===
+[23:16:42.750] === Download starting ===
+[23:16:45.751] Download: pulling TUN08967.ARW
+[23:16:45.751] Download saved: TUN08967.ARW
+[23:16:46.581] === Download finished: 1 file(s) saved ===
+[23:17:34.358] CAPTURE START - shutter down
+[23:17:34.394] CAPTURE SHUTTER UP
+[23:17:42.092] === Download starting ===
+[23:17:45.049] Download: pulling TUN08967.ARW
+[23:17:45.049] Download saved: TUN08967.ARW
+[23:17:45.886] === Download finished: 1 file(s) saved ===
+[23:17:49.902] === Capture log end ===
+[23:20:35.111] === Capture log start ===
+[23:20:53.082] === Download starting ===
+[23:20:56.100] Download: pulling TUN08967.JPG
+[23:20:56.101] Transfer notify=0x20025 file=
+[23:20:56.242] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08967.JPG
+[23:20:56.242] Download saved: C:\Users\Administrator\Pictures\TUN08967.JPG
+[23:20:56.349] Download: pulling TUN08966.JPG
+[23:20:56.349] Transfer notify=0x20025 file=
+[23:20:56.482] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08966.JPG
+[23:20:56.483] Download saved: C:\Users\Administrator\Pictures\TUN08966.JPG
+[23:20:56.592] Download: pulling TUN08965.JPG
+[23:20:56.593] Transfer notify=0x20025 file=
+[23:20:56.732] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08965.JPG
+[23:20:56.732] Download saved: C:\Users\Administrator\Pictures\TUN08965.JPG
+[23:20:56.838] Download: pulling TUN08964.JPG
+[23:20:56.840] Transfer notify=0x20025 file=
+[23:20:56.983] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08964.JPG
+[23:20:56.983] Download saved: C:\Users\Administrator\Pictures\TUN08964.JPG
+[23:20:57.090] Download: pulling TUN08963.JPG
+[23:20:57.091] Transfer notify=0x20025 file=
+[23:20:57.234] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08963.JPG
+[23:20:57.234] Download saved: C:\Users\Administrator\Pictures\TUN08963.JPG
+[23:20:58.084] === Download finished: 5 file(s) saved ===
+[23:21:14.515] CAPTURE START - shutter down
+[23:21:14.550] CAPTURE SHUTTER UP
+[23:21:24.666] === Capture log end ===
+[23:23:39.459] === Capture log start ===
+[23:23:49.207] CAPTURE START - S1andRelease down
+[23:23:49.607] CAPTURE SHUTTER UP
+[23:23:56.373] CAPTURE START - S1andRelease down
+[23:23:56.773] CAPTURE SHUTTER UP
+[23:24:06.497] === Capture log end ===
+[23:25:05.265] === Capture log start ===
+[23:25:13.800] === Download starting ===
+[23:25:16.827] Download: pulling TUN08967.JPG
+[23:25:16.829] Transfer notify=0x20025 file=
+[23:25:16.961] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08967(1).JPG
+[23:25:16.961] Download saved: C:\Users\Administrator\Pictures\TUN08967(1).JPG
+[23:25:17.068] Download: pulling TUN08966.JPG
+[23:25:17.068] Transfer notify=0x20025 file=
+[23:25:17.203] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08966(1).JPG
+[23:25:17.203] Download saved: C:\Users\Administrator\Pictures\TUN08966(1).JPG
+[23:25:17.312] Download: pulling TUN08965.JPG
+[23:25:17.313] Transfer notify=0x20025 file=
+[23:25:17.454] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08965(1).JPG
+[23:25:17.454] Download saved: C:\Users\Administrator\Pictures\TUN08965(1).JPG
+[23:25:17.559] Download: pulling TUN08964.JPG
+[23:25:17.560] Transfer notify=0x20025 file=
+[23:25:17.702] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08964(1).JPG
+[23:25:17.702] Download saved: C:\Users\Administrator\Pictures\TUN08964(1).JPG
+[23:25:17.809] Download: pulling TUN08963.JPG
+[23:25:17.810] Transfer notify=0x20025 file=
+[23:25:17.957] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08963(1).JPG
+[23:25:17.957] Download saved: C:\Users\Administrator\Pictures\TUN08963(1).JPG
+[23:25:18.810] === Download finished: 5 file(s) saved ===
+[23:25:24.859] === Capture log end ===
+[23:35:53.468] === Capture log start ===
+[23:36:07.978] CAPTURE START - S1andRelease down
+[23:36:08.779] CAPTURE SHUTTER UP
+[23:36:30.818] CAPTURE START - S1andRelease down
+[23:36:31.619] CAPTURE SHUTTER UP
+[23:36:42.512] === Download starting ===
+[23:36:45.527] Download: pulling TUN08967.JPG
+[23:36:45.527] Transfer notify=0x20025 file=
+[23:36:45.663] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08967(2).JPG
+[23:36:45.663] Download saved: C:\Users\Administrator\Pictures\TUN08967(2).JPG
+[23:36:45.771] Download: pulling TUN08966.JPG
+[23:36:45.771] Transfer notify=0x20025 file=
+[23:36:45.907] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08966(2).JPG
+[23:36:45.907] Download saved: C:\Users\Administrator\Pictures\TUN08966(2).JPG
+[23:36:46.012] Download: pulling TUN08965.JPG
+[23:36:46.013] Transfer notify=0x20025 file=
+[23:36:46.156] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08965(2).JPG
+[23:36:46.156] Download saved: C:\Users\Administrator\Pictures\TUN08965(2).JPG
+[23:36:46.264] Download: pulling TUN08964.JPG
+[23:36:46.264] Transfer notify=0x20025 file=
+[23:36:46.413] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08964(2).JPG
+[23:36:46.413] Download saved: C:\Users\Administrator\Pictures\TUN08964(2).JPG
+[23:36:46.523] Download: pulling TUN08963.JPG
+[23:36:46.524] Transfer notify=0x20025 file=
+[23:36:46.677] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08963(2).JPG
+[23:36:46.678] Download saved: C:\Users\Administrator\Pictures\TUN08963(2).JPG
+[23:36:47.510] === Download finished: 5 file(s) saved ===
+[23:36:57.193] CAPTURE START - S1andRelease down
+[23:36:57.994] CAPTURE SHUTTER UP
+[23:36:58.561] CAPTURE START - S1andRelease down
+[23:36:59.336] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00001.ARW type: 4294967295
+[23:36:59.336] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00001.ARW
+[23:36:59.361] CAPTURE SHUTTER UP
+[23:36:59.511] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00001.JPG type: 4294967295
+[23:36:59.511] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00001.JPG
+[23:37:00.954] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00002.ARW type: 4294967295
+[23:37:00.954] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00002.ARW
+[23:37:01.149] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00002.JPG type: 4294967295
+[23:37:01.149] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00002.JPG
+[23:37:12.524] CAPTURE START - S1andRelease down
+[23:37:13.326] CAPTURE SHUTTER UP
+[23:37:14.588] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00003.ARW type: 4294967295
+[23:37:14.588] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00003.ARW
+[23:37:14.773] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00003.JPG type: 4294967295
+[23:37:14.774] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00003.JPG
+[23:37:27.824] CAPTURE START - S1andRelease down
+[23:37:28.625] CAPTURE SHUTTER UP
+[23:37:29.867] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00004.ARW type: 4294967295
+[23:37:29.867] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00004.ARW
+[23:37:30.062] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00004.JPG type: 4294967295
+[23:37:30.062] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00004.JPG
+[23:37:55.685] CAPTURE START - S1andRelease down
+[23:37:56.486] CAPTURE SHUTTER UP
+[23:37:57.730] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00005.ARW type: 4294967295
+[23:37:57.730] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00005.ARW
+[23:37:57.937] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00005.JPG type: 4294967295
+[23:37:57.937] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00005.JPG
+[23:38:39.571] CAPTURE START - S1andRelease down
+[23:38:40.371] CAPTURE SHUTTER UP
+[23:39:03.297] CAPTURE START - S1andRelease down
+[23:39:04.098] CAPTURE SHUTTER UP
+[23:39:05.358] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00006.ARW type: 4294967295
+[23:39:05.359] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00006.ARW
+[23:39:05.546] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00006.JPG type: 4294967295
+[23:39:05.546] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00006.JPG
+[23:39:12.144] CAPTURE START - S1andRelease down
+[23:39:12.944] CAPTURE SHUTTER UP
+[23:39:21.163] CAPTURE START - S1andRelease down
+[23:39:21.963] CAPTURE SHUTTER UP
+[23:39:23.213] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00007.ARW type: 4294967295
+[23:39:23.213] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00007.ARW
+[23:39:23.394] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00007.JPG type: 4294967295
+[23:39:23.394] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00007.JPG
+[23:39:31.118] === Capture log end ===
+[23:43:03.367] === Capture log start ===
+[23:43:16.397] CAPTURE START - S1andRelease down
+[23:43:17.198] CAPTURE SHUTTER UP
+[23:43:18.360] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00001.ARW type: 4294967295
+[23:43:18.368] RAW deleted: C:\Users\Administrator\Pictures\TUN00001.ARW
+[23:43:18.559] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00001.JPG type: 4294967295
+[23:43:18.559] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00001.JPG
+[23:43:38.426] CAPTURE START - S1andRelease down
+[23:43:39.226] CAPTURE SHUTTER UP
+[23:43:40.708] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00002.ARW type: 4294967295
+[23:43:40.710] RAW deleted: C:\Users\Administrator\Pictures\TUN00002.ARW
+[23:43:40.887] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00002.JPG type: 4294967295
+[23:43:40.887] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00002.JPG
+[23:43:51.857] CAPTURE START - S1andRelease down
+[23:43:52.659] CAPTURE SHUTTER UP
+[23:44:04.904] CAPTURE START - S1andRelease down
+[23:44:05.705] CAPTURE SHUTTER UP
+[23:44:06.651] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00003.ARW type: 4294967295
+[23:44:06.654] RAW deleted: C:\Users\Administrator\Pictures\TUN00003.ARW
+[23:44:06.841] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00003.JPG type: 4294967295
+[23:44:06.841] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00003.JPG
+[23:44:22.832] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00004.ARW type: 4294967295
+[23:44:22.837] RAW deleted: C:\Users\Administrator\Pictures\TUN00004.ARW
+[23:44:23.008] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00004.JPG type: 4294967295
+[23:44:23.008] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00004.JPG
+[23:44:32.307] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00005.ARW type: 4294967295
+[23:44:32.311] RAW deleted: C:\Users\Administrator\Pictures\TUN00005.ARW
+[23:44:32.511] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00005.JPG type: 4294967295
+[23:44:32.512] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00005.JPG
+[23:44:49.264] CAPTURE START - S1andRelease down
+[23:44:50.065] CAPTURE SHUTTER UP
+[23:44:50.984] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00006.ARW type: 4294967295
+[23:44:50.988] RAW deleted: C:\Users\Administrator\Pictures\TUN00006.ARW
+[23:44:51.193] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00006.JPG type: 4294967295
+[23:44:51.193] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00006.JPG
+[23:45:11.170] CAPTURE START - S1andRelease down
+[23:45:11.971] CAPTURE SHUTTER UP
+[23:45:12.854] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00007.ARW type: 4294967295
+[23:45:12.863] RAW deleted: C:\Users\Administrator\Pictures\TUN00007.ARW
+[23:45:13.026] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00007.JPG type: 4294967295
+[23:45:13.027] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00007.JPG
+[11:39:20.072] === Capture log end ===
+[12:25:58.834] === Capture log start ===
+[12:26:14.596] CAPTURE START - S1andRelease down
+[12:26:15.397] CAPTURE SHUTTER UP
+[12:26:16.379] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00001.ARW type: 4294967295
+[12:26:16.385] RAW deleted: C:\Users\Administrator\Pictures\TUN00001.ARW
+[12:26:16.553] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00001(1).JPG type: 4294967295
+[12:26:16.553] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00001(1).JPG
+[12:59:53.997] CAPTURE START - S1andRelease down
+[12:59:54.797] CAPTURE SHUTTER UP
+[12:59:55.717] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00002.ARW type: 4294967295
+[12:59:55.724] RAW deleted: C:\Users\Administrator\Pictures\TUN00002.ARW
+[12:59:55.912] OnCompleteDownload called - filename: C:\Users\Administrator\Pictures\TUN00002(1).JPG type: 4294967295
+[12:59:55.912] DOWNLOAD COMPLETE - Photo saved: C:\Users\Administrator\Pictures\TUN00002(1).JPG
+[13:00:08.606] === Capture log end ===
+[12:57:03.498] === Capture log start ===
+[13:01:15.769] === Capture log end ===

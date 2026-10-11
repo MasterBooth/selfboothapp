@@ -1,0 +1,9 @@
+{
+  "date": "2026-09-30",
+  "framework": "vanilla-html",
+  "font_stack": "Fraunces + IBM Plex Sans via Google Fonts",
+  "palette": "OKLCH tokens in tokens.css",
+  "motion": "motion-cut with CTA hover lift and one page reveal",
+  "spacing": "4pt semantic scale",
+  "preserve": ["mobile-first static prototype", "selfbooth booking flow"]
+}

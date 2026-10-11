@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Vibe Studio - dat lich chup selfbooth</title>
+    <meta
+      name="description"
+      content="Trang dat lich chup selfbooth voi flow chon phong, goi chup, dich vu them va ma booking."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650;9..144,750&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="tokens.css" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <nav class="nav-pill" aria-label="Điều hướng chính">
+      <a class="wordmark" href="#home" aria-label="Vibe Studio">Vibe Studio</a>
+      <div class="nav-pill__links" aria-label="Liên kết nhanh">
+        <a href="#rooms">Phòng</a>
+        <a href="#flow">Quy trình</a>
+        <a href="#booking">Đặt lịch</a>
+      </div>
+      <a class="nav-pill__cta" href="#booking">Giữ chỗ</a>
+    </nav>
+
+    <main class="shell" id="home">
+      <section class="hero reveal" style="--i: 0">
+        <div class="hero__copy">
+          <p class="kicker">Selfbooth đặt lịch nhanh</p>
+          <h1>Vào booth. Chụp đúng nhịp.</h1>
+          <p>
+            Chọn phòng, gói chụp, dịch vụ in ảnh và nhận mã giữ chỗ ngay trên cùng
+            một màn hình. Danh sách phòng và gói được đồng bộ từ Boothme Admin.
+          </p>
+          <div class="hero__actions" aria-label="Hành động chính">
+            <a class="btn btn--primary" href="#booking">Đặt lịch</a>
+            <a class="text-link" href="#flow">Xem quy trình</a>
+          </div>
+        </div>
+
+        <figure class="hero__figure">
+          <img
+            src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=82"
+            width="1200"
+            height="900"
+            fetchpriority="high"
+            alt="Bàn trang điểm và góc studio ánh sáng ấm"
+          />
+          <figcaption>Ảnh minh họa. Thay bằng ảnh booth thật khi triển khai.</figcaption>
+        </figure>
+      </section>
+
+      <section class="workbench reveal" style="--i: 1">
+        <aside class="customer-panel" aria-labelledby="start-title">
+          <div>
+            <p class="kicker">Bắt đầu phiên</p>
+            <h2 id="start-title">Nhận diện khách</h2>
+            <p class="muted">Số điện thoại dùng để lưu lịch sử đặt chỗ và gallery sau buổi chụp.</p>
+          </div>
+
+          <form class="login-form" id="loginForm">
+            <label class="field" for="phoneInput">
+              <span>Số điện thoại</span>
+              <input
+                id="phoneInput"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="090 123 4567"
+                aria-describedby="phoneHelp"
+                required
+              />
+              <small id="phoneHelp">Dùng số bạn muốn nhận thông báo booking.</small>
+            </label>
+            <label class="field" for="nameInput">
+              <span>Tên của bạn</span>
+              <input id="nameInput" autocomplete="name" placeholder="Linh Nguyễn" />
+              <small>Khách mới có thể nhập tên để lưu hồ sơ.</small>
+            </label>
+            <button class="btn btn--primary" id="loginButton" type="submit">Lưu khách</button>
+          </form>
+
+          <div class="dashboard" id="dashboard" hidden>
+            <div>
+              <p class="kicker">Xin chào</p>
+              <h3 id="customerName">bạn</h3>
+            </div>
+            <p class="muted" id="emptyHistory">Chưa có booking nào. Tạo lịch đầu tiên ở panel bên dưới.</p>
+            <ul class="booking-list" id="bookingList" aria-label="Lịch sử booking"></ul>
+          </div>
+        </aside>
+
+        <section class="booking-panel" id="booking" aria-labelledby="booking-title">
+          <div class="booking-panel__head">
+            <div>
+              <p class="kicker">Workbench đặt lịch</p>
+              <h2 id="booking-title">Chọn buổi chụp</h2>
+            </div>
+            <span class="live-chip"><span></span> còn chỗ hôm nay</span>
+          </div>
+
+          <form class="booking-form" id="bookingForm">
+            <fieldset>
+              <legend>Phòng chụp</legend>
+              <div class="choice-list" id="roomChoices"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Gói chụp</legend>
+              <div class="choice-list" id="packageChoices"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Dịch vụ thêm</legend>
+              <div class="addon-list" id="addonChoices"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Thanh toán</legend>
+              <div class="method-grid">
+                <label class="method is-selected">
+                  <input type="radio" name="payment" value="Chuyển khoản" checked />
+                  <span>Chuyển khoản</span>
+                  <small>QR hoặc ngân hàng</small>
+                </label>
+                <label class="method">
+                  <input type="radio" name="payment" value="Tiền mặt" />
+                  <span>Tiền mặt</span>
+                  <small>Thanh toán tại quầy</small>
+                </label>
+              </div>
+            </fieldset>
+
+            <aside class="receipt" aria-live="polite">
+              <div class="receipt__row">
+                <span>Phòng</span>
+                <strong id="receiptRoom">Amber Room</strong>
+              </div>
+              <div class="receipt__row">
+                <span>Gói</span>
+                <strong id="receiptPackage">Classic</strong>
+              </div>
+              <div class="receipt__row">
+                <span>Dịch vụ thêm</span>
+                <strong id="receiptAddons">0 d</strong>
+              </div>
+              <div class="receipt__row receipt__row--total">
+                <span>Tổng tạm tính</span>
+                <strong id="receiptTotal">390.000 d</strong>
+              </div>
+            </aside>
+
+            <button class="btn btn--primary btn--full" id="bookingButton" type="submit">
+              Xác nhận lịch
+            </button>
+          </form>
+        </section>
+      </section>
+
+      <section class="rooms-section reveal" id="rooms" style="--i: 2" aria-labelledby="rooms-title">
+        <div class="section-head">
+          <h2 id="rooms-title">Hai phòng, hai kiểu ảnh</h2>
+          <p class="muted">Phòng và gói trong form đặt lịch được lấy từ cấu hình studio đang hoạt động.</p>
+        </div>
+        <div class="room-grid">
+          <article class="room-card">
+            <img
+              src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=760&q=80"
+              width="760"
+              height="540"
+              loading="lazy"
+              alt="Không gian chụp tone ấm với hoa và ánh sáng mềm"
+            />
+            <div>
+              <span>Amber Room</span>
+              <h3>Ánh sáng mềm cho portrait và couple.</h3>
+              <p>Tông kem, nâu và đèn dịu. Tối đa 4 người.</p>
+            </div>
+          </article>
+          <article class="room-card room-card--offset">
+            <img
+              src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=760&q=80"
+              width="760"
+              height="540"
+              loading="lazy"
+              alt="Ánh đèn màu trong một buổi chụp nhóm"
+            />
+            <div>
+              <span>Flash Room</span>
+              <h3>Đèn trực diện cho nhóm bạn và sinh nhật.</h3>
+              <p>Nhiều màu hơn, khung ảnh vui hơn. Tối đa 6 người.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="flow-section reveal" id="flow" style="--i: 3" aria-labelledby="flow-title">
+        <div class="section-head section-head--narrow">
+          <h2 id="flow-title">Từ giữ chỗ đến bản in</h2>
+          <p class="muted">Flow được thiết kế để khách tự thao tác trên điện thoại trong lúc đứng tại quầy.</p>
+        </div>
+        <ol class="timeline-list">
+          <li>
+            <span>1</span>
+            <div>
+              <h3>Lưu khách</h3>
+              <p>Nhập số điện thoại, thêm tên nếu là khách mới.</p>
+            </div>
+          </li>
+          <li>
+            <span>2</span>
+            <div>
+              <h3>Chọn phòng và gói</h3>
+              <p>Receipt cập nhật ngay khi đổi phòng, gói hoặc add-on.</p>
+            </div>
+          </li>
+          <li>
+            <span>3</span>
+            <div>
+              <h3>Nhận mã booking</h3>
+              <p>Mã giữ chỗ dùng cho thanh toán, vào hàng chờ và mở gallery.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="confirmation reveal" id="confirmation" hidden aria-labelledby="confirm-title">
+        <div class="confirm-card">
+          <p class="kicker">Booking đã tạo</p>
+          <div class="booking-code" id="confirmCode">VB-2048</div>
+          <h2 id="confirm-title">Hẹn gặp bạn tại booth</h2>
+          <p class="muted" id="confirmMeta">Amber Room · Classic · Chờ thanh toán</p>
+        </div>
+        <div class="status-line" aria-label="Trạng thái booking">
+          <div class="status-line__item is-done">
+            <span></span>
+            <strong>Đã tạo lịch</strong>
+          </div>
+          <div class="status-line__item is-current">
+            <span></span>
+            <strong>Chờ thanh toán</strong>
+          </div>
+          <div class="status-line__item">
+            <span></span>
+            <strong>Vào phòng chụp</strong>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Giữ lịch gọn, để buổi chụp có nhiều chỗ cho bạn hơn.</p>
+      <div class="site-footer__meta">
+        <span class="wordmark">Vibe Studio</span>
+        <a href="#booking">Đặt lịch</a>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

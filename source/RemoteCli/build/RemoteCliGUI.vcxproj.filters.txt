@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\main_gui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CameraGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CameraController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CameraDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\PropertyValueTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\ConnectionInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\MessageDefine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\CrDebugString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\OpenCVWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\imgui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\imgui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\imgui\imgui_impl_dx11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\imgui\imgui_impl_win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\imgui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\app\imgui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{490ABCA9-1D33-325D-8537-82891BFDF0D8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Administrator\Desktop\sourcecode\sdkcanon-main\remotecli\build-release\CMakeFiles\a14e7f26a9db5e67b08f1d6b8d824aad\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{D46C0638-189F-388D-B9BC-FD1BD6A60E0B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

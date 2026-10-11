@@ -1,0 +1,29 @@
+# Chứa ADMIN_API_TOKEN (secret) của app BOOTHME_ADMIN — không commit
+admin-config.json
+
+# Local/public deployment config. Never commit machine/customer config or secrets.
+key.json
+**/key.json
+config.local.json
+*.local.json
+.env
+.env.*
+
+# Build outputs and local runtime state.
+source/main/build_*/
+source/main/build-*/
+source/main/build*/
+source/main/installer-output/
+source/main/build_studio/bin/*/data/
+source/main/build_studio/bin/*/logs/
+source/main/build_studio/bin/*/pending_uploads/
+source/main/build_studio/bin/*/captures/
+source/main/cloudflare/selfboothvn-api/.wrangler/
+.git-history-backup/
+opencv/
+SDK13410/
+source/main/ffmpeg/
+source/RemoteCli/external/opencv/
+source/CameraApp/build/
+source/CameraApp/python/build/
+**/node_modules/

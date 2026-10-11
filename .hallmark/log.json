@@ -1,0 +1,67 @@
+[
+  {
+    "date": "2026-10-05",
+    "scope": "component",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "none",
+    "nav": "Settings sidebar",
+    "footer": "none",
+    "brief": "Background settings workbench: five active booth screens with global override warning"
+  },
+  {
+    "date": "2026-10-03",
+    "scope": "app",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "none",
+    "nav": "Route stepper (6 steps)",
+    "footer": "none",
+    "brief": "Redesign guest flow: frame groups editor full-screen, 2-up photo tile, heart pick, one-row gallery actions, less copy"
+  },
+  {
+    "date": "2026-10-02",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "none",
+    "nav": "Route stepper (7 steps)",
+    "footer": "none",
+    "brief": "Guest compose flow: gallery → frame → photos → ghép → chỉnh sửa → ảnh in → in"
+  },
+  {
+    "date": "2026-10-02",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "none",
+    "nav": "Sidebar workbench",
+    "footer": "none",
+    "brief": "BOOTHME Admin (Qt) — license console: duyệt máy, OTP, gia hạn, thu hồi"
+  },
+  {
+    "date": "2026-09-30",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "admin-console",
+    "nav": "Sidebar workbench",
+    "footer": "none",
+    "brief": "Selfbooth admin UI shell"
+  },
+  {
+    "date": "2026-09-30",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "photo-placeholder",
+    "nav": "N5 Floating pill",
+    "footer": "Ft5 Statement",
+    "brief": "Selfbooth booking website"
+  },
+  {
+    "date": "2026-09-30",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "admin-auth",
+    "nav": "N5 Floating pill",
+    "footer": "Ft5 Statement",
+    "brief": "Selfbooth admin login/logout"
+  }
+]

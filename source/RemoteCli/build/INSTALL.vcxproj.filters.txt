@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Administrator\Downloads\CrSDK_v2.01.00_20260203a_Win64\RemoteCli\build\CMakeFiles\72c7ae08e921a4cf27da34fe1585146e\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{7B5B756F-43EE-3517-AF84-14EF890FFBA8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

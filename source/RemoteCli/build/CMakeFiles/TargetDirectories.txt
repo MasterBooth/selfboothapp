@@ -1,0 +1,5 @@
+C:/Users/Administrator/Downloads/CrSDK_v2.01.00_20260203a_Win64/RemoteCli/build/CMakeFiles/RemoteCli.dir
+C:/Users/Administrator/Downloads/CrSDK_v2.01.00_20260203a_Win64/RemoteCli/build/CMakeFiles/RemoteCliGUI.dir
+C:/Users/Administrator/Downloads/CrSDK_v2.01.00_20260203a_Win64/RemoteCli/build/CMakeFiles/INSTALL.dir
+C:/Users/Administrator/Downloads/CrSDK_v2.01.00_20260203a_Win64/RemoteCli/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/Administrator/Downloads/CrSDK_v2.01.00_20260203a_Win64/RemoteCli/build/CMakeFiles/ZERO_CHECK.dir

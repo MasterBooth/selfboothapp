@@ -1,0 +1,153 @@
+<RCC>
+    <qresource prefix="/">
+        <file>theme/Theme.qml</file>
+        <file>theme/Mode3Layout.qml</file>
+        <file>theme/qmldir</file>
+        <file>assets/1.png</file>
+        <file>assets/2.png</file>
+        <file>assets/3.png</file>
+        <file>assets/4.png</file>
+        <file>assets/5.png</file>
+        <file>assets/log.png</file>
+        <file alias="assets/bg/select_service.png">assets/services.png</file>
+        <file alias="assets/bg/cut_mode.png">assets/choncoanh (2).png</file>
+        <file alias="assets/bg/layout.png">assets/chonframe (2).png</file>
+        <file alias="assets/bg/composition.png">assets/ghepvaoframe (2).png</file>
+        <file alias="assets/bg/filter.png">assets/chonfilter (2).png</file>
+        <file alias="assets/bg/print_quantity.png">assets/chonsoin (2).png</file>
+        <file alias="assets/bg/payment_method.png">assets/thanhtoan (2).png</file>
+        <file alias="assets/bg/payment_qr.png">assets/QRCODE.png</file>
+        <file alias="assets/bg/payment_cash.png">assets/CRASSH.png</file>
+        <file alias="assets/bg/waiting.png">assets/doiinanh (2).png</file>
+        <file alias="assets/bg/result.png">assets/danginanh (2).png</file>
+        <file alias="assets/bg/mode_photobooth.png">assets/photobooth.png</file>
+        <file alias="assets/bg/mode_selfbooth.png">assets/selfbooth.png</file>
+        <file alias="assets/bg/thumb_photobooth.png">assets/photobooth.png</file>
+        <file alias="assets/bg/thumb_selfbooth.png">assets/selfbooth.png</file>
+        <file alias="assets/bg/thumb_cut.png">assets/5x15.png</file>
+        <file alias="assets/bg/thumb_nocut.png">assets/10x15 (1).png</file>
+        <!-- Session page backgrounds -->
+        <file>assets/chonggoi.png</file>
+        <file>assets/frame.png</file>
+        <file>assets/ghepkhunghinh.png</file>
+        <file>assets/thanhtoan.png</file>
+        <file>assets/filter.png</file>
+        <file alias="assets/icons/settings_button.png">../installer_assets/2.png</file>
+        <file alias="assets/icons/quit_app.png">../installer_assets/15.png</file>
+        <file alias="assets/icons/logout_account.png">../installer_assets/icons8-logout-96.png</file>
+        <file alias="assets/icons/camera_setting.png">../installer_assets/icons8-camera-100.png</file>
+        <file alias="assets/icons/gallery_setting.png">../installer_assets/icons8-gallery-100.png</file>
+        <file alias="assets/icons/coupon_setting.png">../installer_assets/icons8-coupon-100.png</file>
+        <file alias="assets/icons/account_setting.png">../installer_assets/icons8-account-100.png</file>
+        <file>assets/icons/settings.svg</file>
+        <file>assets/icons/camera.svg</file>
+        <file>assets/icons/capture.svg</file>
+        <file>assets/icons/printer.svg</file>
+        <file>assets/icons/share.svg</file>
+        <file>assets/icons/frames.svg</file>
+        <file>assets/icons/account.svg</file>
+        <file>assets/icons/image.svg</file>
+        <file>assets/icons/palette.svg</file>
+        <file>assets/icons/ticket.svg</file>
+        <file>assets/icons/revenue.svg</file>
+        <file>assets/icons/info.svg</file>
+        <file>assets/icons/mode.svg</file>
+        <file>assets/icons/LUCIDE_LICENSE.txt</file>
+        <file>main.qml</file>
+        <file>selfbooth_main.qml</file>
+        <file>ptb_main.qml</file>
+        <file>../logo.png</file>
+        <file>components/TopBar.qml</file>
+        <file>components/CircleThumb.qml</file>
+        <file>components/Mode3ThumbPreloader.qml</file>
+        <file>components/EventCard.qml</file>
+        <file>components/EventListPanel.qml</file>
+        <file>components/ConfigPanel.qml</file>
+        <file>components/CaptureModePicker.qml</file>
+        <file>components/EffectsPanel.qml</file>
+        <file>components/EffectToggle.qml</file>
+        <file>components/ConfigSection.qml</file>
+        <file>components/NewEventDialog.qml</file>
+        <file>components/EventDetailDialog.qml</file>
+        <file>components/EventDetailPanel.qml</file>
+        <file>components/NewEventPanel.qml</file>
+        <file>components/LiveViewPanel.qml</file>
+        <file>components/ExternalLiveViewWindow.qml</file>
+        <file>components/SessionPhotoWallWindow.qml</file>
+        <file>components/CameraControls.qml</file>
+        <file>components/StyledGroupBox.qml</file>
+        <file>components/SettingsIcon.qml</file>
+        <file>components/SettingsCategoryCard.qml</file>
+        <file>components/SettingsOverviewCard.qml</file>
+        <file>components/SettingsToggleRow.qml</file>
+        <file>components/SecurityMethodSelector.qml</file>
+        <file>components/CameraSettingSlider.qml</file>
+        <file>components/CameraStudioSettings.qml</file>
+        <file>components/StatusCard.qml</file>
+        <file>components/LiveViewCard.qml</file>
+        <file>components/ExposureCard.qml</file>
+        <file>components/CaptureSettingsCard.qml</file>
+        <file>components/CircularLoadingIndicator.qml</file>
+        <file>components/StartupSplash.qml</file>
+        <file>components/LayoutOverlay.qml</file>
+        <file>components/ColorPicker.qml</file>
+        <file>components/ModeButton.qml</file>
+        <file>components/AdminPinDialog.qml</file>
+        <file>components/PinPad.qml</file>
+        <file>components/LicenseUpgradePanel.qml</file>
+        <file>components/StudioInfoPanel.qml</file>
+        <file>components/UpgradeNoticePopup.qml</file>
+        <file>components/EmployeeLoginDialog.qml</file>
+        <file>components/DateTimePicker.qml</file>
+        <file>components/BackgroundMedia.qml</file>
+        <file>components/FrameProgressDialog.qml</file>
+        <file>components/HoldToActivate.qml</file>
+        <file>pages/SettingsPage.qml</file>
+        <file>pages/LandingPage.qml</file>
+        <file>pages/WelcomePaper.qml</file>
+        <file>pages/LayoutPaper.qml</file>
+        <file>pages/PaperSession.qml</file>
+        <file>pages/ModePicker.qml</file>
+        <file>pages/selfbooth/qmldir</file>
+        <file>pages/selfbooth/WelcomeSelf.qml</file>
+        <file>pages/selfbooth/SettingSelf.qml</file>
+        <file>pages/selfbooth/OptionTime.qml</file>
+        <file>pages/selfbooth/LCaptureSelf.qml</file>
+        <file>pages/selfbooth/QRCodeSelf.qml</file>
+        <file>pages/selfbooth/FolderSessionModel.qml</file>
+        <file>pages/selfbooth/PtbSettings.qml</file>
+        <file>pages/PrintPage.qml</file>
+        <file>pages/AuthScreen.qml</file>
+        <file>pages/StudioLoginScreen.qml</file>
+        <file>pages/ActivationScreen.qml</file>
+        <file>pages/BoothSession.qml</file>
+        <file>pages/session/Waiting.qml</file>
+        <file>pages/session/ModeSelection.qml</file>
+        <file>pages/session/CaptureScreen.qml</file>
+        <file>pages/session/LayoutSelection.qml</file>
+        <file>pages/session/ResultScreen.qml</file>
+        <file>pages/session/WaitingResults.qml</file>
+        <file>pages/session/GalleryScreen.qml</file>
+        <file>pages/session/QRScreen.qml</file>
+        <file>pages/session/PhotoCompositionScreen.qml</file>
+        <file>pages/session/FilterScreen.qml</file>
+        <file>pages/session/PaymentScreen.qml</file>
+        <file>pages/session/CutModeScreen.qml</file>
+        <file>pages/session/SelectServiceScreen.qml</file>
+        <file>pages/session/SelfBoothWaiting.qml</file>
+        <file>pages/session/SelfBoothCapture.qml</file>
+        <file>pages/session/SelfBoothSettings.qml</file>
+        <file>pages/session/PrintQuantityScreen.qml</file>
+        <file>pages/session/PaymentMethodScreen.qml</file>
+        <file>pages/session/CashPaymentScreen.qml</file>
+        <file>pages/session/VoucherScreen.qml</file>
+        <file>pages/session/EnterCode.qml</file>
+        <file>pickup/pickup.html</file>
+        <file>js/CameraHelpers.js</file>
+        <file>utils/Money.js</file>
+        <file>pages/session/ExposureHelper.js</file>
+    </qresource>
+    <qresource prefix="/kbstyles">
+        <file alias="QtQuick/VirtualKeyboard/Styles/studio/style.qml">QtQuick/VirtualKeyboard/Styles/studio/style.qml</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,84 @@
+/* Hallmark tokens · Studio soft editorial · paper=light · display=serif · accent=warm */
+:root {
+  --color-paper: oklch(96.5% 0.018 76);
+  --color-paper-2: oklch(93.5% 0.022 76);
+  --color-paper-3: oklch(89% 0.026 76);
+  --color-surface: oklch(98% 0.012 76);
+  --color-nav: oklch(98% 0.012 76 / 0.84);
+  --color-caption: oklch(22% 0.03 55 / 0.88);
+  --color-rule: oklch(78% 0.026 74);
+  --color-rule-strong: oklch(65% 0.035 70);
+  --color-neutral: oklch(45% 0.035 62);
+  --color-muted: oklch(35% 0.035 58);
+  --color-ink: oklch(20% 0.035 54);
+  --color-accent: oklch(39% 0.09 48);
+  --color-accent-ink: oklch(98% 0.012 76);
+  --color-focus: oklch(50% 0.16 55);
+  --color-price: oklch(48% 0.1 78);
+  --color-success: oklch(43% 0.08 135);
+  --color-success-soft: oklch(88% 0.055 135);
+  --color-error: oklch(48% 0.16 28);
+
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: clamp(2rem, 4vw, 3.25rem);
+  --text-3xl: clamp(2.4rem, 6vw, 4.4rem);
+  --text-display: clamp(3rem, 8vw, 5.25rem);
+
+  --leading-tight: 1.03;
+  --leading-snug: 1.22;
+  --leading-body: 1.58;
+  --tracking-display: -0.035em;
+  --tracking-label: 0.12em;
+
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --page-gutter: clamp(1rem, 4vw, 2rem);
+
+  --content-narrow: 46rem;
+  --content-wide: 72rem;
+  --nav-max: 42rem;
+
+  --control-sm: 2.75rem;
+  --control-md: 3rem;
+  --control-lg: 4.25rem;
+
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-pill: 999rem;
+
+  --rule-hair: 1px;
+  --rule-focus: 2px;
+
+  --shadow-soft: 0 1rem 2.5rem oklch(20% 0.035 54 / 0.12);
+  --shadow-hairline: 0 0 0 1px oklch(20% 0.035 54 / 0.035);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 400;
+}

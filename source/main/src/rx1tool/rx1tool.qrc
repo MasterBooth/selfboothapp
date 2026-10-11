@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/rx1tool">
+        <file alias="Main.qml">qml/Main.qml</file>
+    </qresource>
+</RCC>

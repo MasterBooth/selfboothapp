@@ -1,0 +1,5 @@
+C:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/cameraapp/build-release/CMakeFiles/CameraApp.dir
+C:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/cameraapp/build-release/CMakeFiles/CameraAppGUI.dir
+C:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/cameraapp/build-release/CMakeFiles/gui_driver.dir
+C:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/cameraapp/build-release/CMakeFiles/ALL_BUILD.dir
+C:/Users/Administrator/Downloads/sdkcanon-main/sdkcanon-main/cameraapp/build-release/CMakeFiles/ZERO_CHECK.dir

@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/admin">
+        <file alias="qmldir">qml/qmldir</file>
+        <file alias="Main.qml">qml/Main.qml</file>
+        <file alias="Tk.qml">qml/Tk.qml</file>
+        <file alias="Btn.qml">qml/Btn.qml</file>
+        <file alias="Chip.qml">qml/Chip.qml</file>
+        <file alias="Field.qml">qml/Field.qml</file>
+        <file alias="StatusPill.qml">qml/StatusPill.qml</file>
+        <file alias="SideItem.qml">qml/SideItem.qml</file>
+        <file alias="MachinesPage.qml">qml/MachinesPage.qml</file>
+        <file alias="MachineDetail.qml">qml/MachineDetail.qml</file>
+        <file alias="KeyPage.qml">qml/KeyPage.qml</file>
+        <file alias="ServerPage.qml">qml/ServerPage.qml</file>
+        <file alias="fonts/Fraunces.ttf">fonts/Fraunces.ttf</file>
+        <file alias="fonts/IBMPlexSans.ttf">fonts/IBMPlexSans.ttf</file>
+        <file alias="fonts/IBMPlexMono-Regular.ttf">fonts/IBMPlexMono-Regular.ttf</file>
+        <file alias="fonts/IBMPlexMono-Medium.ttf">fonts/IBMPlexMono-Medium.ttf</file>
+    </qresource>
+</RCC>

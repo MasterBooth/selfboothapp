@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/printstation">
+    <file alias="Main.qml">qml/Main.qml</file>
+    <file alias="theme/Theme.qml">qml/theme/Theme.qml</file>
+    <file alias="theme/qmldir">qml/theme/qmldir</file>
+  </qresource>
+</RCC>

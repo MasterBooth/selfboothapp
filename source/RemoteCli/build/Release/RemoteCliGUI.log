@@ -1,0 +1,634 @@
+﻿[22:48:00.965] === RemoteCliGUI session start ===
+[22:48:04.869] Enumerating cameras (2s)...
+[22:48:07.058] Found 1 camera(s).
+[22:48:09.073] Connecting to ILCE-7C ()...
+[22:48:09.077] Connected successfully.
+[22:48:09.086] StillImageStoreDestination: card failed (0x8402), trying HostPC+Card...
+[22:48:09.086] Save path set: C:\Users\Administrator\Pictures
+[22:48:09.176] OnConnected callback.
+[22:48:10.204] Warning: 0x2006e
+[22:48:14.561] Capture: shutter down...
+[22:48:14.597] Capture: shutter up.
+[22:48:20.426] Set property PC Only
+[22:48:24.497] Capture: shutter down...
+[22:48:24.533] Capture: shutter up.
+[22:48:50.722] Capture: shutter down...
+[22:48:50.758] Capture: shutter up.
+[22:49:03.419] Capture: shutter down...
+[22:49:03.454] Capture: shutter up.
+[22:49:05.879] Capture: shutter down...
+[22:49:05.914] Capture: shutter up.
+[22:49:07.782] AF+Shoot: S1+Release down...
+[22:49:07.883] AF+Shoot: release up.
+[22:49:09.499] Capture: shutter down...
+[22:49:09.535] Capture: shutter up.
+[22:49:38.729] Set property Drive 0x10007
+[22:49:42.394] Capture: shutter down...
+[22:49:42.430] Capture: shutter up.
+[22:49:49.492] Set property 1/80
+[22:49:52.001] Disconnecting...
+[22:49:52.005] Camera disconnected (code=0x0).
+[22:49:52.027] Disconnected.
+[22:49:52.027] === RemoteCliGUI session end ===
+[22:51:41.175] === RemoteCliGUI session start ===
+[22:51:44.037] Enumerating cameras (2s)...
+[22:51:46.220] Found 1 camera(s).
+[22:51:47.792] Connecting to ILCE-7C ()...
+[22:51:47.797] Connected successfully.
+[22:51:47.797] StillImageStoreDestination: HostPC failed (0x8402), trying HostPC+Card...
+[22:51:47.797] Save path set: C:\Users\Administrator\Pictures
+[22:51:47.901] OnConnected callback.
+[22:51:49.322] Warning: 0x2006e
+[22:51:53.864] Capture: shutter down...
+[22:51:53.899] Capture: shutter up.
+[22:52:09.863] Capture: shutter down...
+[22:52:09.899] Capture: shutter up.
+[22:52:23.977] AF+Shoot: S1+Release down...
+[22:52:24.078] AF+Shoot: release up.
+[22:52:27.925] Capture: shutter down...
+[22:52:27.961] Capture: shutter up.
+[22:52:49.629] Disconnecting...
+[22:52:49.641] Camera disconnected (code=0x0).
+[22:52:49.661] Disconnected.
+[22:52:49.661] === RemoteCliGUI session end ===
+[22:56:00.534] === RemoteCliGUI session start ===
+[22:56:04.013] Enumerating cameras (2s)...
+[22:56:06.196] Found 1 camera(s).
+[22:56:08.535] Connecting to ILCE-7C ()...
+[22:56:08.541] Connected successfully.
+[22:56:08.541] StillImageStoreDestination: HostPC failed (0x8402), trying HostPC+Card...
+[22:56:08.543] Save path set: C:\Users\Administrator\Pictures
+[22:56:08.666] OnConnected callback.
+[22:56:10.116] Warning: 0x2006e
+[22:56:38.315] Capture: shutter down...
+[22:56:38.351] Capture: shutter up.
+[22:57:47.828] Capture: shutter down...
+[22:57:47.863] Capture: shutter up.
+[22:57:56.621] Disconnecting...
+[22:57:56.629] Camera disconnected (code=0x0).
+[22:57:56.665] Disconnected.
+[22:57:56.665] === RemoteCliGUI session end ===
+[23:01:36.767] === RemoteCliGUI session start ===
+[23:01:39.514] Enumerating cameras (2s)...
+[23:01:41.690] Found 1 camera(s).
+[23:01:44.169] Connecting to ILCE-7C ()...
+[23:01:44.174] Connected successfully.
+[23:01:44.174] EnableLiveView: OK
+[23:01:44.174] EnablePostView: FAILED
+[23:01:44.174] PostViewTransferringType Legacy: FAILED
+[23:01:44.174] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:01:44.174] Save path set: C:\Users\Administrator\Pictures
+[23:01:44.261] OnConnected callback.
+[23:01:45.697] Warning: 0x2006e
+[23:02:21.715] Capture: shutter down...
+[23:02:21.750] Capture: shutter up.
+[23:02:24.660] Capture: shutter down...
+[23:02:24.696] Capture: shutter up.
+[23:02:30.349] Disconnecting...
+[23:02:30.354] Camera disconnected (code=0x0).
+[23:02:30.366] Disconnected.
+[23:02:30.366] === RemoteCliGUI session end ===
+[23:12:17.747] === RemoteCliGUI session start ===
+[23:12:22.923] Enumerating cameras (2s)...
+[23:12:25.125] Found 1 camera(s).
+[23:12:27.460] Connecting to ILCE-7C ()...
+[23:12:27.465] Connected successfully.
+[23:12:27.465] EnableLiveView: OK
+[23:12:27.465] EnablePostView: FAILED
+[23:12:27.465] PostViewTransferringType Legacy: FAILED
+[23:12:27.465] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:12:27.465] Save path set: C:\Users\Administrator\Pictures
+[23:12:27.543] OnConnected callback.
+[23:12:29.040] Warning: 0x2006e
+[23:12:32.465] === Download: starting (will switch to RemoteTransfer mode) ===
+[23:12:32.466] Download: disconnecting Remote mode...
+[23:12:32.474] Camera disconnected (code=0x0).
+[23:12:32.997] Download: connecting in RemoteTransfer mode...
+[23:12:33.000] Download: RemoteTransfer connected, waiting for camera ready...
+[23:12:33.041] Error: 0x8219
+[23:12:35.001] Download: GetContentsInfoList failed 0x8402 nums=0
+[23:12:35.003] Download: disconnecting RemoteTransfer...
+[23:12:35.534] Download: reconnecting Remote mode...
+[23:12:35.534] Connecting to ILCE-7C ()...
+[23:12:35.539] Connected successfully.
+[23:12:35.539] EnableLiveView: OK
+[23:12:35.539] EnablePostView: FAILED
+[23:12:35.539] PostViewTransferringType Legacy: FAILED
+[23:12:35.539] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:12:35.540] Save path set: C:\Users\Administrator\Pictures
+[23:12:35.540] === Download finished: 0 file(s) saved ===
+[23:12:35.624] OnConnected callback.
+[23:12:37.217] Warning: 0x2006e
+[23:13:22.549] Capture: shutter down...
+[23:13:22.584] Capture: shutter up.
+[23:13:24.546] === Download: starting (will switch to RemoteTransfer mode) ===
+[23:13:24.546] Download: disconnecting Remote mode...
+[23:13:24.563] Camera disconnected (code=0x0).
+[23:13:25.094] Download: connecting in RemoteTransfer mode...
+[23:13:25.097] Download: RemoteTransfer connected, waiting for camera ready...
+[23:13:25.144] Error: 0x8219
+[23:13:27.098] Download: GetContentsInfoList failed 0x8402 nums=0
+[23:13:27.098] Download: disconnecting RemoteTransfer...
+[23:13:27.631] Download: reconnecting Remote mode...
+[23:13:27.631] Connecting to ILCE-7C ()...
+[23:13:27.633] Connected successfully.
+[23:13:27.633] EnableLiveView: OK
+[23:13:27.633] EnablePostView: FAILED
+[23:13:27.633] PostViewTransferringType Legacy: FAILED
+[23:13:27.633] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:13:27.634] Save path set: C:\Users\Administrator\Pictures
+[23:13:27.634] === Download finished: 0 file(s) saved ===
+[23:13:27.724] OnConnected callback.
+[23:13:28.396] Warning: 0x2006e
+[23:13:29.701] Disconnecting...
+[23:13:29.732] Camera disconnected (code=0x0).
+[23:13:29.732] Disconnected.
+[23:13:29.732] === RemoteCliGUI session end ===
+[23:16:31.193] === RemoteCliGUI session start ===
+[23:16:33.356] Enumerating cameras (2s)...
+[23:16:35.551] Found 1 camera(s).
+[23:16:36.776] Connecting to ILCE-7C ()...
+[23:16:36.780] Connected successfully.
+[23:16:36.781] EnableLiveView: OK
+[23:16:36.781] EnablePostView: FAILED
+[23:16:36.781] PostViewTransferringType Legacy: FAILED
+[23:16:36.781] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:16:36.781] Save path set: C:\Users\Administrator\Pictures
+[23:16:36.893] OnConnected callback.
+[23:16:37.849] Warning: 0x2006e
+[23:16:42.750] === Download: starting (will switch to ContentsTransfer mode) ===
+[23:16:42.750] Download: disconnecting Remote mode...
+[23:16:42.755] Camera disconnected (code=0x0).
+[23:16:43.582] Download: connecting in ContentsTransfer mode...
+[23:16:43.589] Download: ContentsTransfer connected, waiting for camera ready...
+[23:16:43.728] OnConnected callback.
+[23:16:44.555] Warning: 0x2006e
+[23:16:45.621] Download: found 1 folder(s).
+[23:16:45.671] Download: folder has 474 file(s).
+[23:16:45.751] Download: pulling TUN08967.ARW...
+[23:16:45.751] Download: saved TUN08967.ARW
+[23:16:45.751] Download: disconnecting ContentsTransfer...
+[23:16:45.752] Transfer: 
+[23:16:45.759] Camera disconnected (code=0x0).
+[23:16:45.771] Transfer: 
+[23:16:46.577] Download: reconnecting Remote mode...
+[23:16:46.577] Connecting to ILCE-7C ()...
+[23:16:46.580] Connected successfully.
+[23:16:46.580] EnableLiveView: OK
+[23:16:46.580] EnablePostView: FAILED
+[23:16:46.580] PostViewTransferringType Legacy: FAILED
+[23:16:46.580] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:16:46.581] Save path set: C:\Users\Administrator\Pictures
+[23:16:46.581] === Download finished: 1 file(s) saved ===
+[23:16:46.684] OnConnected callback.
+[23:16:47.089] Warning: 0x2006e
+[23:17:34.358] Capture: shutter down...
+[23:17:34.394] Capture: shutter up.
+[23:17:40.406] Set property Custom WB 3
+[23:17:42.092] === Download: starting (will switch to ContentsTransfer mode) ===
+[23:17:42.092] Download: disconnecting Remote mode...
+[23:17:42.105] Camera disconnected (code=0x0).
+[23:17:42.938] Download: connecting in ContentsTransfer mode...
+[23:17:42.946] Download: ContentsTransfer connected, waiting for camera ready...
+[23:17:43.096] OnConnected callback.
+[23:17:43.912] Warning: 0x2006e
+[23:17:44.972] Download: found 1 folder(s).
+[23:17:44.994] Download: folder has 474 file(s).
+[23:17:45.048] Download: pulling TUN08967.ARW...
+[23:17:45.049] Download: saved TUN08967.ARW
+[23:17:45.049] Download: disconnecting ContentsTransfer...
+[23:17:45.050] Transfer: 
+[23:17:45.053] Camera disconnected (code=0x0).
+[23:17:45.066] Transfer: 
+[23:17:45.883] Download: reconnecting Remote mode...
+[23:17:45.883] Connecting to ILCE-7C ()...
+[23:17:45.886] Connected successfully.
+[23:17:45.886] EnableLiveView: OK
+[23:17:45.886] EnablePostView: FAILED
+[23:17:45.886] PostViewTransferringType Legacy: FAILED
+[23:17:45.886] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:17:45.886] Save path set: C:\Users\Administrator\Pictures
+[23:17:45.886] === Download finished: 1 file(s) saved ===
+[23:17:45.988] OnConnected callback.
+[23:17:46.445] Warning: 0x2006e
+[23:17:49.858] Disconnecting...
+[23:17:49.863] Camera disconnected (code=0x0).
+[23:17:49.902] Disconnected.
+[23:17:49.902] === RemoteCliGUI session end ===
+[23:20:35.110] === RemoteCliGUI session start ===
+[23:20:37.215] Enumerating cameras (2s)...
+[23:20:39.410] Found 1 camera(s).
+[23:20:40.919] Connecting to ILCE-7C ()...
+[23:20:40.924] Connected successfully.
+[23:20:40.924] EnableLiveView: OK
+[23:20:40.924] EnablePostView: FAILED
+[23:20:40.924] PostViewTransferringType Legacy: FAILED
+[23:20:40.924] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:20:40.924] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:20:40.924] Save path set: C:\Users\Administrator\Pictures
+[23:20:41.008] OnConnected callback.
+[23:20:42.448] Warning: 0x2006e
+[23:20:53.082] === Download: starting (will switch to ContentsTransfer mode) ===
+[23:20:53.083] Download: disconnecting Remote mode...
+[23:20:53.095] Camera disconnected (code=0x0).
+[23:20:53.925] Download: connecting in ContentsTransfer mode...
+[23:20:53.927] Download: ContentsTransfer connected, waiting for camera ready...
+[23:20:54.108] OnConnected callback.
+[23:20:54.689] Warning: 0x2006e
+[23:20:55.955] Download: found 1 folder(s).
+[23:20:55.978] Download: folder has 474 file(s).
+[23:20:56.100] Download: pulling TUN08967.JPG...
+[23:20:56.101] Transfer notify=0x20025 file=
+[23:20:56.242] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08967.JPG
+[23:20:56.242] Download: saved -> C:\Users\Administrator\Pictures\TUN08967.JPG
+[23:20:56.349] Download: pulling TUN08966.JPG...
+[23:20:56.349] Transfer notify=0x20025 file=
+[23:20:56.482] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08966.JPG
+[23:20:56.483] Download: saved -> C:\Users\Administrator\Pictures\TUN08966.JPG
+[23:20:56.592] Download: pulling TUN08965.JPG...
+[23:20:56.593] Transfer notify=0x20025 file=
+[23:20:56.732] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08965.JPG
+[23:20:56.732] Download: saved -> C:\Users\Administrator\Pictures\TUN08965.JPG
+[23:20:56.838] Download: pulling TUN08964.JPG...
+[23:20:56.839] Transfer notify=0x20025 file=
+[23:20:56.983] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08964.JPG
+[23:20:56.983] Download: saved -> C:\Users\Administrator\Pictures\TUN08964.JPG
+[23:20:57.090] Download: pulling TUN08963.JPG...
+[23:20:57.091] Transfer notify=0x20025 file=
+[23:20:57.234] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08963.JPG
+[23:20:57.234] Download: saved -> C:\Users\Administrator\Pictures\TUN08963.JPG
+[23:20:57.234] Download: disconnecting ContentsTransfer...
+[23:20:57.243] Camera disconnected (code=0x0).
+[23:20:58.081] Download: reconnecting Remote mode...
+[23:20:58.081] Connecting to ILCE-7C ()...
+[23:20:58.083] Connected successfully.
+[23:20:58.083] EnableLiveView: OK
+[23:20:58.083] EnablePostView: FAILED
+[23:20:58.083] PostViewTransferringType Legacy: FAILED
+[23:20:58.083] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:20:58.083] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:20:58.084] Save path set: C:\Users\Administrator\Pictures
+[23:20:58.084] === Download finished: 5 file(s) saved ===
+[23:20:58.169] OnConnected callback.
+[23:20:58.439] Warning: 0x2006e
+[23:21:14.515] Capture: shutter down...
+[23:21:14.550] Capture: shutter up.
+[23:21:24.629] Disconnecting...
+[23:21:24.641] Camera disconnected (code=0x0).
+[23:21:24.666] Disconnected.
+[23:21:24.666] === RemoteCliGUI session end ===
+[23:23:39.459] === RemoteCliGUI session start ===
+[23:23:42.050] Enumerating cameras (2s)...
+[23:23:44.228] Found 1 camera(s).
+[23:23:45.554] Connecting to ILCE-7C ()...
+[23:23:45.558] Connected successfully.
+[23:23:45.558] EnableLiveView: OK
+[23:23:45.558] EnablePostView: FAILED
+[23:23:45.558] PostViewTransferringType Legacy: FAILED
+[23:23:45.558] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:23:45.558] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:23:45.558] Save path set: C:\Users\Administrator\Pictures
+[23:23:45.666] OnConnected callback.
+[23:23:47.184] Warning: 0x2006e
+[23:23:49.207] Capture: AF + shutter down...
+[23:23:49.607] Capture: shutter up.
+[23:23:56.373] Capture: AF + shutter down...
+[23:23:56.773] Capture: shutter up.
+[23:23:56.840] Warning: 0x2006e
+[23:23:57.552] Warning: 0x2006e
+[23:24:06.468] Disconnecting...
+[23:24:06.485] Camera disconnected (code=0x0).
+[23:24:06.497] Disconnected.
+[23:24:06.497] === RemoteCliGUI session end ===
+[23:25:05.265] === RemoteCliGUI session start ===
+[23:25:07.952] Enumerating cameras (2s)...
+[23:25:10.148] Found 1 camera(s).
+[23:25:11.656] Connecting to ILCE-7C ()...
+[23:25:11.660] Connected successfully.
+[23:25:11.660] EnableLiveView: OK
+[23:25:11.660] EnablePostView: FAILED
+[23:25:11.660] PostViewTransferringType Legacy: FAILED
+[23:25:11.660] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:25:11.660] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:25:11.660] Save path set: C:\Users\Administrator\Pictures
+[23:25:11.742] OnConnected callback.
+[23:25:13.185] Warning: 0x2006e
+[23:25:13.800] === Download: starting (will switch to ContentsTransfer mode) ===
+[23:25:13.800] Download: disconnecting Remote mode...
+[23:25:13.824] Camera disconnected (code=0x0).
+[23:25:14.647] Download: connecting in ContentsTransfer mode...
+[23:25:14.651] Download: ContentsTransfer connected, waiting for camera ready...
+[23:25:14.798] OnConnected callback.
+[23:25:16.679] Download: found 1 folder(s).
+[23:25:16.701] Download: folder has 474 file(s).
+[23:25:16.827] Download: pulling TUN08967.JPG...
+[23:25:16.829] Transfer notify=0x20025 file=
+[23:25:16.961] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08967(1).JPG
+[23:25:16.961] Download: saved -> C:\Users\Administrator\Pictures\TUN08967(1).JPG
+[23:25:17.068] Download: pulling TUN08966.JPG...
+[23:25:17.068] Transfer notify=0x20025 file=
+[23:25:17.203] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08966(1).JPG
+[23:25:17.203] Download: saved -> C:\Users\Administrator\Pictures\TUN08966(1).JPG
+[23:25:17.312] Download: pulling TUN08965.JPG...
+[23:25:17.313] Transfer notify=0x20025 file=
+[23:25:17.454] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08965(1).JPG
+[23:25:17.454] Download: saved -> C:\Users\Administrator\Pictures\TUN08965(1).JPG
+[23:25:17.559] Download: pulling TUN08964.JPG...
+[23:25:17.560] Transfer notify=0x20025 file=
+[23:25:17.702] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08964(1).JPG
+[23:25:17.702] Download: saved -> C:\Users\Administrator\Pictures\TUN08964(1).JPG
+[23:25:17.809] Download: pulling TUN08963.JPG...
+[23:25:17.810] Transfer notify=0x20025 file=
+[23:25:17.957] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08963(1).JPG
+[23:25:17.957] Download: saved -> C:\Users\Administrator\Pictures\TUN08963(1).JPG
+[23:25:17.957] Download: disconnecting ContentsTransfer...
+[23:25:17.960] Camera disconnected (code=0x0).
+[23:25:18.807] Download: reconnecting Remote mode...
+[23:25:18.807] Connecting to ILCE-7C ()...
+[23:25:18.809] Connected successfully.
+[23:25:18.809] EnableLiveView: OK
+[23:25:18.809] EnablePostView: FAILED
+[23:25:18.809] PostViewTransferringType Legacy: FAILED
+[23:25:18.809] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:25:18.809] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:25:18.810] Save path set: C:\Users\Administrator\Pictures
+[23:25:18.810] === Download finished: 5 file(s) saved ===
+[23:25:18.896] OnConnected callback.
+[23:25:19.165] Warning: 0x2006e
+[23:25:24.810] Disconnecting...
+[23:25:24.820] Camera disconnected (code=0x0).
+[23:25:24.859] Disconnected.
+[23:25:24.859] === RemoteCliGUI session end ===
+[23:35:53.468] === RemoteCliGUI session start ===
+[23:35:56.732] Enumerating cameras (2s)...
+[23:35:58.917] Found 1 camera(s).
+[23:36:02.171] Connecting to ILCE-7C ()...
+[23:36:02.176] Connected successfully.
+[23:36:02.176] EnableLiveView: OK
+[23:36:02.176] EnablePostView: FAILED
+[23:36:02.176] PostViewTransferringType Legacy: FAILED
+[23:36:02.176] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:36:02.176] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:36:02.177] Save path set: C:\Users\Administrator\Pictures
+[23:36:02.271] OnConnected callback.
+[23:36:03.702] Warning: 0x2006e
+[23:36:07.827] Capture: drive mode is Continuous — switching to Single for reliable single shot...
+[23:36:07.827] DriveMode set to Single.
+[23:36:07.978] Capture: AF + shutter down...
+[23:36:08.578] Warning: 0x2006e
+[23:36:08.779] Capture: shutter up.
+[23:36:10.357] Warning: 0x2006e
+[23:36:29.010] Set property Continuous Lo
+[23:36:30.667] Capture: drive mode is Continuous — switching to Single for reliable single shot...
+[23:36:30.667] DriveMode set to Single.
+[23:36:30.818] Capture: AF + shutter down...
+[23:36:31.404] Warning: 0x2006e
+[23:36:31.619] Capture: shutter up.
+[23:36:33.184] Warning: 0x2006e
+[23:36:42.512] === Download: starting (will switch to ContentsTransfer mode) ===
+[23:36:42.512] Download: disconnecting Remote mode...
+[23:36:42.516] Camera disconnected (code=0x0).
+[23:36:43.340] Download: connecting in ContentsTransfer mode...
+[23:36:43.342] Download: ContentsTransfer connected, waiting for camera ready...
+[23:36:43.519] OnConnected callback.
+[23:36:44.309] Warning: 0x2006e
+[23:36:45.371] Download: found 1 folder(s).
+[23:36:45.394] Download: folder has 474 file(s).
+[23:36:45.527] Download: pulling TUN08967.JPG...
+[23:36:45.527] Transfer notify=0x20025 file=
+[23:36:45.663] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08967(2).JPG
+[23:36:45.663] Download: saved -> C:\Users\Administrator\Pictures\TUN08967(2).JPG
+[23:36:45.771] Download: pulling TUN08966.JPG...
+[23:36:45.771] Transfer notify=0x20025 file=
+[23:36:45.907] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08966(2).JPG
+[23:36:45.907] Download: saved -> C:\Users\Administrator\Pictures\TUN08966(2).JPG
+[23:36:46.012] Download: pulling TUN08965.JPG...
+[23:36:46.013] Transfer notify=0x20025 file=
+[23:36:46.156] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08965(2).JPG
+[23:36:46.156] Download: saved -> C:\Users\Administrator\Pictures\TUN08965(2).JPG
+[23:36:46.264] Download: pulling TUN08964.JPG...
+[23:36:46.264] Transfer notify=0x20025 file=
+[23:36:46.413] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08964(2).JPG
+[23:36:46.413] Download: saved -> C:\Users\Administrator\Pictures\TUN08964(2).JPG
+[23:36:46.523] Download: pulling TUN08963.JPG...
+[23:36:46.524] Transfer notify=0x20025 file=
+[23:36:46.677] Transfer notify=0x20026 file=C:\Users\Administrator\Pictures\TUN08963(2).JPG
+[23:36:46.678] Download: saved -> C:\Users\Administrator\Pictures\TUN08963(2).JPG
+[23:36:46.678] Download: disconnecting ContentsTransfer...
+[23:36:46.684] Camera disconnected (code=0x0).
+[23:36:47.501] Download: reconnecting Remote mode...
+[23:36:47.502] Connecting to ILCE-7C ()...
+[23:36:47.509] Connected successfully.
+[23:36:47.509] EnableLiveView: OK
+[23:36:47.509] EnablePostView: FAILED
+[23:36:47.509] PostViewTransferringType Legacy: FAILED
+[23:36:47.509] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:36:47.509] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:36:47.510] Save path set: C:\Users\Administrator\Pictures
+[23:36:47.510] === Download finished: 5 file(s) saved ===
+[23:36:47.623] OnConnected callback.
+[23:36:47.865] Warning: 0x2006e
+[23:36:57.193] Capture: AF + shutter down...
+[23:36:57.674] Warning: 0x2006e
+[23:36:57.994] Capture: shutter up.
+[23:36:58.081] Warning [ExposureStarted] 0x20011
+[23:36:58.561] Capture: AF + shutter down...
+[23:36:59.336] Photo saved: C:\Users\Administrator\Pictures\TUN00001.ARW
+[23:36:59.361] Capture: shutter up.
+[23:36:59.511] Photo saved: C:\Users\Administrator\Pictures\TUN00001.JPG
+[23:36:59.656] Warning [ExposureStarted] 0x20011
+[23:37:00.954] Photo saved: C:\Users\Administrator\Pictures\TUN00002.ARW
+[23:37:01.149] Photo saved: C:\Users\Administrator\Pictures\TUN00002.JPG
+[23:37:01.384] Warning: 0x2006e
+[23:37:12.524] Capture: AF + shutter down...
+[23:37:13.027] Warning: 0x2006e
+[23:37:13.281] Warning [ExposureStarted] 0x20011
+[23:37:13.326] Capture: shutter up.
+[23:37:14.588] Photo saved: C:\Users\Administrator\Pictures\TUN00003.ARW
+[23:37:14.774] Photo saved: C:\Users\Administrator\Pictures\TUN00003.JPG
+[23:37:15.060] Warning: 0x2006e
+[23:37:25.550] Set property Continuous Lo
+[23:37:27.674] Capture: drive mode is Continuous — switching to Single for reliable single shot...
+[23:37:27.674] DriveMode set to Single.
+[23:37:27.824] Capture: AF + shutter down...
+[23:37:28.429] Warning: 0x2006e
+[23:37:28.581] Warning [ExposureStarted] 0x20011
+[23:37:28.625] Capture: shutter up.
+[23:37:29.867] Photo saved: C:\Users\Administrator\Pictures\TUN00004.ARW
+[23:37:30.062] Photo saved: C:\Users\Administrator\Pictures\TUN00004.JPG
+[23:37:30.360] Warning: 0x2006e
+[23:37:50.457] Set property WB 0x0012
+[23:37:53.667] Set property WB 0x0000
+[23:37:55.685] Capture: AF + shutter down...
+[23:37:56.141] Warning: 0x2006e
+[23:37:56.446] Warning [ExposureStarted] 0x20011
+[23:37:56.486] Capture: shutter up.
+[23:37:57.730] Photo saved: C:\Users\Administrator\Pictures\TUN00005.ARW
+[23:37:57.937] Photo saved: C:\Users\Administrator\Pictures\TUN00005.JPG
+[23:37:58.075] Warning: 0x2006e
+[23:38:25.231] AF+Shoot: S1+Release down...
+[23:38:25.332] AF+Shoot: release up.
+[23:38:39.571] Capture: AF + shutter down...
+[23:38:40.021] Warning: 0x2006e
+[23:38:40.371] Capture: shutter up.
+[23:38:42.105] Warning: 0x2006e
+[23:38:48.604] Focus: step Far.
+[23:38:48.612] OperationInvalid (camera busy / wrong state) p1=0x9207
+[23:38:53.326] Focus: step Near.
+[23:38:53.391] OperationInvalid (camera busy / wrong state) p1=0x9207
+[23:39:00.199] AF+Shoot: S1+Release down...
+[23:39:00.300] AF+Shoot: release up.
+[23:39:03.297] Capture: AF + shutter down...
+[23:39:03.766] Warning: 0x2006e
+[23:39:04.071] Warning [ExposureStarted] 0x20011
+[23:39:04.098] Capture: shutter up.
+[23:39:05.359] Photo saved: C:\Users\Administrator\Pictures\TUN00006.ARW
+[23:39:05.546] Photo saved: C:\Users\Administrator\Pictures\TUN00006.JPG
+[23:39:05.952] Warning: 0x2006e
+[23:39:09.518] AF+Shoot: S1+Release down...
+[23:39:09.618] AF+Shoot: release up.
+[23:39:12.144] Capture: AF + shutter down...
+[23:39:12.944] Capture: shutter up.
+[23:39:13.121] Warning: 0x2006e
+[23:39:13.935] Warning: 0x2006e
+[23:39:21.163] Capture: AF + shutter down...
+[23:39:21.663] Warning: 0x2006e
+[23:39:21.963] Capture: shutter up.
+[23:39:21.968] Warning [ExposureStarted] 0x20011
+[23:39:23.213] Photo saved: C:\Users\Administrator\Pictures\TUN00007.ARW
+[23:39:23.394] Photo saved: C:\Users\Administrator\Pictures\TUN00007.JPG
+[23:39:23.747] Warning: 0x2006e
+[23:39:31.090] Disconnecting...
+[23:39:31.093] Camera disconnected (code=0x0).
+[23:39:31.118] Disconnected.
+[23:39:31.118] === RemoteCliGUI session end ===
+[23:43:03.367] === RemoteCliGUI session start ===
+[23:43:05.927] Enumerating cameras (2s)...
+[23:43:08.108] Found 1 camera(s).
+[23:43:10.284] Connecting to ILCE-7C ()...
+[23:43:10.290] Connected successfully.
+[23:43:10.290] EnableLiveView: OK
+[23:43:10.290] EnablePostView: FAILED
+[23:43:10.290] PostViewTransferringType Legacy: FAILED
+[23:43:10.290] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[23:43:10.290] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[23:43:10.290] Save path set: C:\Users\Administrator\Pictures
+[23:43:10.389] OnConnected callback.
+[23:43:10.392] Warning: 0x2006e
+[23:43:11.815] Warning: 0x2006e
+[23:43:16.397] Capture: AF + shutter down...
+[23:43:17.053] Warning [ExposureStarted] 0x20011
+[23:43:17.154] Warning: 0x2006e
+[23:43:17.197] Capture: shutter up.
+[23:43:18.368] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00001.ARW
+[23:43:18.559] Photo saved: C:\Users\Administrator\Pictures\TUN00001.JPG
+[23:43:18.936] Warning: 0x2006e
+[23:43:33.214] Set property 1/100
+[23:43:36.691] Set property WB 0x0011
+[23:43:38.426] Capture: AF + shutter down...
+[23:43:38.915] Warning: 0x2006e
+[23:43:39.226] Capture: shutter up.
+[23:43:39.423] Warning [ExposureStarted] 0x20011
+[23:43:40.710] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00002.ARW
+[23:43:40.887] Photo saved: C:\Users\Administrator\Pictures\TUN00002.JPG
+[23:43:41.608] Warning: 0x2006e
+[23:43:45.611] Set property WB 0x0012
+[23:43:47.986] AF+Shoot: S1+Release down...
+[23:43:48.086] AF+Shoot: release up.
+[23:43:51.857] Capture: AF + shutter down...
+[23:43:52.334] Warning: 0x2006e
+[23:43:52.658] Capture: shutter up.
+[23:43:54.369] Warning: 0x2006e
+[23:44:04.904] Capture: AF + shutter down...
+[23:44:05.300] Warning [ExposureStarted] 0x20011
+[23:44:05.351] Warning: 0x2006e
+[23:44:05.705] Capture: shutter up.
+[23:44:06.654] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00003.ARW
+[23:44:06.841] Photo saved: C:\Users\Administrator\Pictures\TUN00003.JPG
+[23:44:07.335] Warning: 0x2006e
+[23:44:13.845] Set property Continuous Hi
+[23:44:17.176] Focus mode: switching to MF...
+[23:44:17.176] Set property MF
+[23:44:21.463] AF+Shoot: S1+Release down...
+[23:44:21.564] AF+Shoot: release up.
+[23:44:21.667] Warning [ExposureStarted] 0x20011
+[23:44:21.871] Warning: 0x2006e
+[23:44:22.837] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00004.ARW
+[23:44:23.008] Photo saved: C:\Users\Administrator\Pictures\TUN00004.JPG
+[23:44:23.294] Warning: 0x2006e
+[23:44:30.895] AF+Shoot: S1+Release down...
+[23:44:30.996] AF+Shoot: release up.
+[23:44:31.073] Warning [ExposureStarted] 0x20011
+[23:44:31.327] Warning: 0x2006e
+[23:44:32.311] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00005.ARW
+[23:44:32.511] Photo saved: C:\Users\Administrator\Pictures\TUN00005.JPG
+[23:44:32.749] Warning: 0x2006e
+[23:44:41.273] Focus mode: switching to AF-S...
+[23:44:41.273] Set property AF-S
+[23:44:43.651] AF+Shoot: S1+Release down...
+[23:44:43.752] AF+Shoot: release up.
+[23:44:46.456] AF+Shoot: S1+Release down...
+[23:44:46.556] AF+Shoot: release up.
+[23:44:49.113] Capture: drive mode is Continuous — switching to Single for reliable single shot...
+[23:44:49.113] DriveMode set to Single.
+[23:44:49.264] Capture: AF + shutter down...
+[23:44:49.677] Warning [ExposureStarted] 0x20011
+[23:44:49.880] Warning: 0x2006e
+[23:44:50.064] Capture: shutter up.
+[23:44:50.988] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00006.ARW
+[23:44:51.193] Photo saved: C:\Users\Administrator\Pictures\TUN00006.JPG
+[23:44:51.964] Warning: 0x2006e
+[23:45:09.260] Set property WB 0x0013
+[23:45:11.170] Capture: AF + shutter down...
+[23:45:11.587] Warning [ExposureStarted] 0x20011
+[23:45:11.689] Warning: 0x2006e
+[23:45:11.971] Capture: shutter up.
+[23:45:12.863] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00007.ARW
+[23:45:13.027] Photo saved: C:\Users\Administrator\Pictures\TUN00007.JPG
+[23:45:13.773] Warning: 0x2006e
+[07:14:04.995] Warning: 0x20002
+[07:19:04.770] Error: 0x8209
+[07:19:04.770] Camera disconnected (code=0x8209).
+[11:39:03.515] Enumerating cameras (2s)...
+[11:39:05.709] Enumeration failed.
+[11:39:12.323] Enumerating cameras (2s)...
+[11:39:14.510] Enumeration failed.
+[11:39:20.072] === RemoteCliGUI session end ===
+[12:25:58.833] === RemoteCliGUI session start ===
+[12:26:02.560] Enumerating cameras (2s)...
+[12:26:04.746] Found 1 camera(s).
+[12:26:06.546] Connecting to ILCE-7C ()...
+[12:26:06.551] Connected successfully.
+[12:26:06.551] EnableLiveView: OK
+[12:26:06.551] EnablePostView: FAILED
+[12:26:06.551] PostViewTransferringType Legacy: FAILED
+[12:26:06.551] StillImageStoreDestination: using camera default (PostView Legacy mode will transfer images).
+[12:26:06.551] FileType: JPEG set FAILED (camera may already be set, or controlled by physical dial)
+[12:26:06.551] Save path set: C:\Users\Administrator\Pictures
+[12:26:06.704] OnConnected callback.
+[12:26:08.229] Warning: 0x2006e
+[12:26:12.678] Set property WB 0x0012
+[12:26:14.596] Capture: AF + shutter down...
+[12:26:14.988] Warning [ExposureStarted] 0x20011
+[12:26:15.141] Warning: 0x2006e
+[12:26:15.396] Capture: shutter up.
+[12:26:16.385] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00001.ARW
+[12:26:16.553] Photo saved: C:\Users\Administrator\Pictures\TUN00001(1).JPG
+[12:26:17.225] Warning: 0x2006e
+[12:59:53.996] Capture: AF + shutter down...
+[12:59:54.423] Warning [ExposureStarted] 0x20011
+[12:59:54.525] Warning: 0x2006e
+[12:59:54.797] Capture: shutter up.
+[12:59:55.724] RAW skipped (deleted): C:\Users\Administrator\Pictures\TUN00002.ARW
+[12:59:55.912] Photo saved: C:\Users\Administrator\Pictures\TUN00002(1).JPG
+[12:59:56.559] Warning: 0x2006e
+[13:00:08.558] Disconnecting...
+[13:00:08.563] Camera disconnected (code=0x0).
+[13:00:08.605] Disconnected.
+[13:00:08.606] === RemoteCliGUI session end ===
+[12:57:03.497] === RemoteCliGUI session start ===
+[12:57:06.409] Enumerating cameras (2s)...
+[12:57:08.589] Enumeration failed.
+[12:57:13.316] Enumerating cameras (2s)...
+[12:57:15.497] Enumeration failed.
+[13:01:15.769] === RemoteCliGUI session end ===
