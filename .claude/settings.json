@@ -30,7 +30,26 @@
       "Bash(npx wrangler *)",
       "Bash(echo \"exit $?\")",
       "Bash(python /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_filters.py app/page.tsx /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_filters_handlers.tsx /c/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/8f607c14-bfab-456a-8912-48adeb07192d/scratchpad/admin_filters_section.tsx)",
-      "Bash(git -C /c/Users/ASUS/Desktop/selfbooth show HEAD:web/admin/app/globals.css)"
+      "Bash(git -C /c/Users/ASUS/Desktop/selfbooth show HEAD:web/admin/app/globals.css)",
+      "Bash(timeout 70 npx --no-install wrangler tail selfboothvn-admin --format json)",
+      "Bash(node C:/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/da0fe0f8-1c2a-4a09-b1b0-ad6d92473e94/scratchpad/tail/summarize.mjs C:/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/da0fe0f8-1c2a-4a09-b1b0-ad6d92473e94/scratchpad/tail/web2.jsonl)",
+      "Bash(curl -s -o /dev/null -w \"admin: %{http_code}\\\\n\" https://boothme.tech/)",
+      "Bash(curl -s -o /dev/null -w \"booking: %{http_code}\\\\n\" https://boothme.tech/booking)",
+      "Bash(curl -s -o /dev/null -w \"staff: %{http_code}\\\\n\" https://boothme.tech/staff)",
+      "Bash(sed -i 's/          appearance: \"interaction-only\",/          \\\\/\\\\/ Luôn hiện ô xác minh \\(ai rủi ro thấp được Cloudflare tự tích, người khác phải bấm\\).\\\\n          appearance: \"always\",/' Turnstile.tsx)",
+      "Bash(sed -i 's/ \\\\* nothing renders, so sign-in keeps working. Managed mode: most people never see a puzzle./ * nothing renders, so sign-in keeps working. The box is always shown; in Managed mode Cloudflare\\\\n * ticks it by itself for low-risk visitors and asks the rest to click./' Turnstile.tsx)",
+      "Bash(npx --no-install wrangler dev --local --persist-to C:/Users/ASUS/AppData/Local/Temp/claude/c--Users-ASUS-Desktop-selfbooth/da0fe0f8-1c2a-4a09-b1b0-ad6d92473e94/scratchpad/apitest/state --port 8799 --var UPLOAD_SIGNING_SECRET:test-secret --var LICENSE_PUBLIC_KEYS:x --var TURNSTILE_SITE_KEY:)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://127.0.0.1:8800/staff?studio=studio_test_01\")",
+      "Bash(grep -i -E \"camera|canon|nikon|sony|fuji|hotfolder|mock|\\\\.h$|\\\\.cpp$\")",
+      "Bash(grep -v -i -E \"/\\(build|out|third_party|sdk\\)/|\\\\.\\(png|jpg|qml\\)$\")",
+      "Bash(grep -v -E \"\\\\.\\(obj|tlog\\)$\")",
+      "PowerShell(\\(Invoke-WebRequest -Uri \"https://boothme.tech/gallery\" -UseBasicParsing\\).StatusCode)",
+      "PowerShell(cd c:\\\\Users\\\\ASUS\\\\Desktop\\\\selfbooth\\\\source\\\\main\\\\cloudflare\\\\selfboothvn-api; npx wrangler secret list 2>&1 | Select-Object -Last 15; try { \\(Invoke-WebRequest -Uri \"https://boothme.tech/v1/public/booking-options\" -UseBasicParsing\\).StatusCode } catch { $_.Exception.Response.StatusCode.value__ })",
+      "PowerShell($r = Invoke-WebRequest -Uri \"https://boothme.tech/v1/public/booking/options\" -UseBasicParsing; $r.StatusCode; $r.Content.Substring\\(0, [Math]::Min\\(200, $r.Content.Length\\)\\))",
+      "Read(//c/Qt/**)",
+      "Bash(xxd)",
+      "PowerShell(Get-Process BOOTHME -ErrorAction SilentlyContinue)",
+      "Bash(git diff *)"
     ],
     "additionalDirectories": [
       "\\tmp"

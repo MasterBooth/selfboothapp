@@ -53,9 +53,10 @@ set(SOURCES
     # Camera Backend (CameraApp::CameraController)
     src/backend/CameraController.cpp
     src/backend/CameraEventBridge.cpp
-    # Nguồn chụp Hot Folder (thư mục ảnh / FUJIFILM HotFolder.exe)
+    # Nguồn chụp Hot Folder (thư mục ảnh / FUJIFILM HotFolder.exe / FUJIFILM Tether App)
     src/backend/HotFolderWatcher.cpp
     src/backend/FujiHotFolderProcess.cpp
+    src/backend/FujiTetherAppProcess.cpp
     # USB Relay control (qua helper 32-bit RelayCli.exe + QProcess)
     src/backend/RelayController.cpp
     src/backend/DisplayManager.cpp
@@ -116,6 +117,7 @@ set(HEADERS
     src/backend/CameraEventBridge.h
     src/backend/HotFolderWatcher.h
     src/backend/FujiHotFolderProcess.h
+    src/backend/FujiTetherAppProcess.h
     src/backend/RelayController.h
     src/backend/DisplayManager.h
     src/backend/LiveViewImageProvider.h
@@ -447,6 +449,21 @@ if(WIN32)
                 FUJI_HOTFOLDER_DEV_EXE="${_fuji_hotfolder_exe}")
         else()
             message(WARNING "FUJIFILM HotFolder.exe not found: ${_fuji_hotfolder_exe}")
+        endif()
+
+        # ── FUJIFILM Tether App (nguồn chụp Hot Folder · Tether App) ──────────
+        # Chép nguyên thư mục cài vào <exe>/tools/fuji_tetherapp/ để đóng gói kèm.
+        # Thiếu thì app vẫn dùng bản người dùng tự cài ở Program Files.
+        set(FUJI_TETHERAPP_DIR "C:/Program Files/FUJIFILM_TetherApp"
+            CACHE PATH "Folder of the installed FUJIFILM Tether App to bundle with BOOTHME")
+        if(EXISTS "${FUJI_TETHERAPP_DIR}/FUJIFILM_TetherApp.exe")
+            add_custom_command(TARGET BOOTHME POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    "${FUJI_TETHERAPP_DIR}" "$<TARGET_FILE_DIR:BOOTHME>/tools/fuji_tetherapp"
+                COMMENT "Copying FUJIFILM Tether App"
+            )
+        else()
+            message(WARNING "FUJIFILM Tether App not found: ${FUJI_TETHERAPP_DIR}")
         endif()
     endif()
 

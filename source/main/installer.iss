@@ -8,7 +8,7 @@
 ;   iscc installer.iss
 
 #define AppName      "BOOTHME"
-#define AppVersion   "2.0.0"
+#define AppVersion   "2.1.1"
 #define AppPublisher "Tivasolutions"
 #define AppExe       "BOOTHME.exe"
 #define BuildDir     "build_studio\bin\Release"
@@ -172,6 +172,10 @@
 #endif
 #if !DirExists(BuildPath + "\tools\fuji_hotfolder")
   #error Fuji HotFolder tools folder is missing from the deploy folder.
+#endif
+; Tether App là tuỳ chọn: thiếu thì máy khách phải tự cài FUJIFILM Tether App.
+#if !FileExists(BuildPath + "\tools\fuji_tetherapp\FUJIFILM_TetherApp.exe")
+  #pragma warning "tools\fuji_tetherapp\FUJIFILM_TetherApp.exe is not bundled - Hot Folder Tether App needs a local install."
 #endif
 
 ; Installer assets

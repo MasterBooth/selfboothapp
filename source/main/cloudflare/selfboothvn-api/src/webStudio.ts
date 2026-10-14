@@ -4,7 +4,8 @@ import {
   Env, HttpError, int, isSafeId, json, newId, nowIso, readJson, str,
 } from "./http";
 import { isFourDigitCode } from "./codes";
-import { requireWebSession } from "./webAuth";
+import { requirePermission } from "./webAuth";
+import { READ_FRAMES, READ_ROOMS_PACKAGES } from "./permissions";
 import { ensureGalleryToken, signedMediaUrl } from "./upload";
 import { brandingFor } from "./branding";
 import { settingsFor } from "./bookings";
@@ -56,14 +57,74 @@ async function randomFreeCode(env: Env, studioId: string, taken: Set<string>): P
   throw new HttpError(409, "no_free_code", "Studio đã dùng gần hết 10 000 mã 4 số");
 }
 
-export async function handleWebRooms(req: Request, env: Env): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+/** Room description shown on the booking page: a short paragraph, line breaks kept. */
+const ROOM_DESCRIPTION_MAX = 1000;
+const ROOM_CAPACITY_MAX = 80;
+/** Cover upload: the admin's original (kept) + the guest-facing copy their browser made. */
+const MAX_ROOM_COVER_BYTES = 15 * 1024 * 1024;
+const MAX_ROOM_COVER_DISPLAY_BYTES = 3 * 1024 * 1024;
+const ROOM_COVER_TYPES: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+/** Cover links stay valid a day: the booking page is opened from a QR and left open. */
+const ROOM_COVER_URL_TTL_SECONDS = 24 * 3600;
+
+const ROOM_COLUMNS = "id, name, description, capacity, status, cover_object_key, cover_display_key, cover_crop, created_at, updated_at";
+
+type CoverCrop = { x: number; y: number; w: number; h: number };
+
+/** {"x","y","w","h"} as fractions of the original, inside it; anything else → null. */
+function parseCoverCrop(v: unknown): CoverCrop | null {
+  let raw: unknown = v;
+  if (typeof v === "string") {
+    try { raw = JSON.parse(v); } catch { return null; }
+  }
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const n = (k: string) => Number(r[k]);
+  const crop = { x: n("x"), y: n("y"), w: n("w"), h: n("h") };
+  const ok = Object.values(crop).every((value) => Number.isFinite(value))
+    && crop.w > 0 && crop.h > 0 && crop.x >= 0 && crop.y >= 0
+    && crop.x + crop.w <= 1.0001 && crop.y + crop.h <= 1.0001;
+  return ok ? crop : null;
+}
+
+/**
+ * Room row → JSON. cover_url is the guest-facing copy (the original when no copy exists).
+ * The admin also gets the untouched original + the saved framing, to reframe without re-uploading.
+ */
+export async function roomRowToJson(env: Env, origin: string, row: Record<string, unknown>) {
+  const coverKey = String(row.cover_display_key || row.cover_object_key || "");
+  const originalKey = String(row.cover_object_key || "");
+  return {
+    id: String(row.id),
+    name: String(row.name ?? ""),
+    description: String(row.description ?? ""),
+    capacity: String(row.capacity ?? ""),
+    status: String(row.status ?? "active"),
+    created_at: String(row.created_at ?? ""),
+    updated_at: String(row.updated_at ?? ""),
+    cover_url: coverKey ? await signedMediaUrl(env, origin, coverKey, ROOM_COVER_URL_TTL_SECONDS) : "",
+    cover_original_url: originalKey ? await signedMediaUrl(env, origin, originalKey, ROOM_COVER_URL_TTL_SECONDS) : "",
+    cover_crop: parseCoverCrop(row.cover_crop),
+  };
+}
+
+async function roomById(env: Env, studioId: string, roomId: string) {
+  if (!isSafeId(roomId, 8, 64)) throw new HttpError(400, "invalid_room_id");
+  const row = await env.DB.prepare(
+    `SELECT ${ROOM_COLUMNS} FROM studio_rooms WHERE id = ? AND studio_id = ? AND status = 'active'`)
+    .bind(roomId, studioId).first<Record<string, unknown>>();
+  if (!row) throw new HttpError(404, "room_not_found", "Không tìm thấy phòng chụp");
+  return row;
+}
+
+export async function handleWebRooms(req: Request, env: Env, url: URL): Promise<Response> {
+  const caller = await requirePermission(req, env, ...(req.method === "GET" ? READ_ROOMS_PACKAGES : ["rooms.create"]));
   if (req.method === "GET") {
     const rs = await env.DB.prepare(
-      `SELECT id, name, description, capacity, status, created_at, updated_at
-         FROM studio_rooms WHERE studio_id = ? AND status = 'active' ORDER BY created_at DESC`)
-      .bind(caller.studioId).all();
-    return json({ success: true, rooms: rs.results ?? [] }, 200, { "cache-control": "no-store" });
+      `SELECT ${ROOM_COLUMNS} FROM studio_rooms WHERE studio_id = ? AND status = 'active' ORDER BY created_at DESC`)
+      .bind(caller.studioId).all<Record<string, unknown>>();
+    const rooms = await Promise.all((rs.results ?? []).map((row) => roomRowToJson(env, url.origin, row)));
+    return json({ success: true, rooms }, 200, { "cache-control": "no-store" });
   }
 
   const b = await readJson(req);
@@ -71,18 +132,99 @@ export async function handleWebRooms(req: Request, env: Env): Promise<Response> 
   if (!name) throw new HttpError(400, "room_name_required", "Nhập tên phòng chụp");
   const id = newId();
   const now = nowIso();
+  const description = str(b.description, ROOM_DESCRIPTION_MAX);
+  const capacity = str(b.capacity, ROOM_CAPACITY_MAX);
   await env.DB.prepare(
     `INSERT INTO studio_rooms (id, studio_id, name, description, capacity, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?)`)
-    .bind(id, caller.studioId, name, str(b.description, 300), str(b.capacity, 80), now, now).run();
+    .bind(id, caller.studioId, name, description, capacity, now, now).run();
   return json({
     success: true,
-    room: { id, name, description: str(b.description, 300), capacity: str(b.capacity, 80), status: "active", created_at: now, updated_at: now },
+    room: { id, name, description, capacity, status: "active", created_at: now, updated_at: now, cover_url: "" },
   }, 201);
 }
 
+/** PATCH /v1/web/rooms/:id — { name?, capacity?, description? } */
+export async function handleWebRoomUpdate(req: Request, env: Env, url: URL, roomId: string): Promise<Response> {
+  const caller = await requirePermission(req, env, "rooms.edit");
+  const current = await roomById(env, caller.studioId, roomId);
+  const b = await readJson(req);
+  const name = b.name === undefined ? String(current.name) : str(b.name, 100);
+  if (!name) throw new HttpError(400, "room_name_required", "Nhập tên phòng chụp");
+  const capacity = b.capacity === undefined ? String(current.capacity ?? "") : str(b.capacity, ROOM_CAPACITY_MAX);
+  const description = b.description === undefined ? String(current.description ?? "") : str(b.description, ROOM_DESCRIPTION_MAX);
+  await env.DB.prepare(
+    "UPDATE studio_rooms SET name = ?, capacity = ?, description = ?, updated_at = ? WHERE id = ? AND studio_id = ?")
+    .bind(name, capacity, description, nowIso(), roomId, caller.studioId).run();
+  return json({ success: true, room: await roomRowToJson(env, url.origin, await roomById(env, caller.studioId, roomId)) });
+}
+
+/**
+ * PUT /v1/web/rooms/:id/cover — multipart:
+ *   `file`    the original as the admin picked it, stored untouched (omit to reframe the current one)
+ *   `display` the framed 3:2 copy guests load
+ *   `crop`    JSON {"x","y","w","h"} — the framing, fractions of the original
+ * DELETE removes the cover.
+ */
+export async function handleWebRoomCover(req: Request, env: Env, url: URL, roomId: string): Promise<Response> {
+  const caller = await requirePermission(req, env, "rooms.edit");
+  const current = await roomById(env, caller.studioId, roomId);
+  const currentOriginal = current.cover_object_key ? String(current.cover_object_key) : "";
+  const currentDisplay = current.cover_display_key ? String(current.cover_display_key) : "";
+
+  if (req.method === "DELETE") {
+    await env.DB.prepare(
+      `UPDATE studio_rooms SET cover_object_key = NULL, cover_display_key = NULL, cover_crop = NULL, updated_at = ?
+        WHERE id = ? AND studio_id = ?`)
+      .bind(nowIso(), roomId, caller.studioId).run();
+    const oldKeys = [currentOriginal, currentDisplay].filter(Boolean);
+    if (oldKeys.length) await env.MEDIA.delete(oldKeys);
+    return json({ success: true, room: await roomRowToJson(env, url.origin, await roomById(env, caller.studioId, roomId)) });
+  }
+
+  const form = await req.formData();
+  const file = form.get("file");
+  const display = form.get("display");
+  const cropField = form.get("crop");
+  const crop = cropField === null ? null : parseCoverCrop(String(cropField));
+  if (cropField !== null && !crop) throw new HttpError(400, "cover_crop_invalid", "Khung ảnh bìa không hợp lệ");
+  if (file !== null) {
+    if (!(file instanceof File) || !ROOM_COVER_TYPES[file.type]) {
+      throw new HttpError(400, "cover_type_invalid", "Ảnh phòng phải là JPG, PNG hoặc WebP");
+    }
+    if (file.size <= 0 || file.size > MAX_ROOM_COVER_BYTES) throw new HttpError(400, "cover_too_large", "Ảnh phòng tối đa 15MB");
+  } else if (!currentOriginal || !(display instanceof File)) {
+    // Reframing keeps the stored original, so there has to be one, and a new framed copy.
+    throw new HttpError(400, "cover_file_required", "Chọn ảnh bìa cho phòng");
+  }
+  if (display !== null && (!(display instanceof File) || !ROOM_COVER_TYPES[display.type]
+    || display.size <= 0 || display.size > MAX_ROOM_COVER_DISPLAY_BYTES)) {
+    throw new HttpError(400, "cover_display_invalid", "Bản xem trước của ảnh phòng không hợp lệ");
+  }
+
+  const stamp = Date.now();
+  let originalKey = currentOriginal;
+  if (file instanceof File) {
+    originalKey = `rooms/${caller.studioId}/${roomId}-cover-${stamp}.${ROOM_COVER_TYPES[file.type]}`;
+    await env.MEDIA.put(originalKey, await file.arrayBuffer(), { httpMetadata: { contentType: file.type } });
+  }
+  let displayKey: string | null = null;
+  if (display instanceof File) {
+    displayKey = `rooms/${caller.studioId}/${roomId}-cover-${stamp}-display.${ROOM_COVER_TYPES[display.type]}`;
+    await env.MEDIA.put(displayKey, await display.arrayBuffer(), { httpMetadata: { contentType: display.type } });
+  }
+  await env.DB.prepare(
+    `UPDATE studio_rooms SET cover_object_key = ?, cover_display_key = ?, cover_crop = ?, updated_at = ?
+      WHERE id = ? AND studio_id = ?`)
+    .bind(originalKey, displayKey, crop ? JSON.stringify(crop) : null, nowIso(), roomId, caller.studioId).run();
+  // Old files go once the row points at the new ones; a reframe keeps the original.
+  const oldKeys = [currentOriginal !== originalKey ? currentOriginal : "", currentDisplay].filter(Boolean);
+  if (oldKeys.length) await env.MEDIA.delete(oldKeys);
+  return json({ success: true, room: await roomRowToJson(env, url.origin, await roomById(env, caller.studioId, roomId)) });
+}
+
 export async function handleWebPackages(req: Request, env: Env): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, ...(req.method === "GET" ? READ_ROOMS_PACKAGES : ["packages.create"]));
   if (req.method === "GET") {
     const rs = await env.DB.prepare(
       `SELECT p.id, p.room_id, p.name, p.minutes, p.price_vnd, p.description, p.status,
@@ -117,7 +259,7 @@ export async function handleWebPackages(req: Request, env: Env): Promise<Respons
 }
 
 export async function handleWebCodes(req: Request, env: Env, url: URL): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, req.method === "GET" ? "codes.view" : "codes.create");
   if (req.method === "GET") {
     const status = url.searchParams.get("status");
     const query = status
@@ -173,7 +315,7 @@ export async function handleWebCodes(req: Request, env: Env, url: URL): Promise<
 }
 
 export async function handleWebCodeRevoke(req: Request, env: Env, codeId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "codes.revoke");
   if (!isSafeId(codeId, 8, 64)) throw new HttpError(400, "invalid_code_id");
   const res = await env.DB.prepare(
     "UPDATE package_codes SET status = 'revoked' WHERE id = ? AND studio_id = ? AND status = 'active'")
@@ -184,7 +326,7 @@ export async function handleWebCodeRevoke(req: Request, env: Env, codeId: string
 
 /** POST /v1/web/capture-sessions/:machine/:session/gallery-link — the guest album link (token made on first ask). */
 export async function handleWebSessionGalleryLink(req: Request, env: Env, url: URL, machineId: string, sessionId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "library.share");
   if (!isSafeId(machineId, 8, 64) || !isSafeId(sessionId, 1, 100)) throw new HttpError(400, "invalid_session_id");
   const owner = await env.DB.prepare("SELECT studio_id FROM capture_sessions WHERE machine_id = ? AND session_id = ?")
     .bind(machineId, sessionId).first<{ studio_id: string }>();
@@ -195,7 +337,7 @@ export async function handleWebSessionGalleryLink(req: Request, env: Env, url: U
 
 /** DELETE /v1/web/rooms/:id — archives the room and its packages (bookings and codes keep their names). */
 export async function handleWebRoomDelete(req: Request, env: Env, roomId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "rooms.delete");
   if (!isSafeId(roomId, 8, 64)) throw new HttpError(400, "invalid_room_id");
   const now = nowIso();
   const [room, packages] = await env.DB.batch([
@@ -210,7 +352,7 @@ export async function handleWebRoomDelete(req: Request, env: Env, roomId: string
 
 /** DELETE /v1/web/packages/:id — archives the package; codes already issued keep working. */
 export async function handleWebPackageDelete(req: Request, env: Env, packageId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "packages.delete");
   if (!isSafeId(packageId, 8, 64)) throw new HttpError(400, "invalid_package_id");
   const res = await env.DB.prepare(
     "UPDATE studio_packages SET status = 'archived', updated_at = ? WHERE id = ? AND studio_id = ? AND status = 'active'")
@@ -233,7 +375,7 @@ function softDeleteCodes(env: Env, studioId: string, ids: string[]) {
 
 /** DELETE /v1/web/codes/:id */
 export async function handleWebCodeDelete(req: Request, env: Env, codeId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "codes.delete");
   if (!isSafeId(codeId, 8, 64)) throw new HttpError(400, "invalid_code_id");
   const [res] = await softDeleteCodes(env, caller.studioId, [codeId]);
   if ((res.meta.changes ?? 0) === 0) throw new HttpError(404, "code_not_found");
@@ -242,7 +384,7 @@ export async function handleWebCodeDelete(req: Request, env: Env, codeId: string
 
 /** POST /v1/web/codes/bulk-delete {ids} */
 export async function handleWebCodesBulkDelete(req: Request, env: Env): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "codes.delete");
   const b = await readJson(req);
   const ids = Array.isArray(b.ids) ? [...new Set(b.ids.map((id) => String(id)))] : [];
   if (ids.length === 0 || ids.length > MAX_CODE_BULK_DELETE || !ids.every((id) => isSafeId(id, 8, 64))) {
@@ -254,7 +396,7 @@ export async function handleWebCodesBulkDelete(req: Request, env: Env): Promise<
 }
 
 export async function handleWebRevenue(req: Request, env: Env): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "revenue.view");
   const summary = await env.DB.prepare(
     `SELECT COUNT(*) AS used_codes,
             COALESCE(SUM(u.price_vnd), 0) AS code_revenue_vnd,
@@ -366,7 +508,7 @@ const MAX_FRAME_PREVIEW_BYTES = 3 * 1024 * 1024;
  * With ?kind=thumb it is the frame's grid thumbnail instead.
  */
 export async function handleWebFramePreview(req: Request, env: Env, url: URL, frameId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "frames.upload", "frames.edit");
   if (!isSafeId(frameId, 8, 64)) throw new HttpError(400, "invalid_frame_id");
   const thumb = url.searchParams.get("kind") === "thumb";
   const column = thumb ? "thumb_object_key" : "preview_object_key";
@@ -404,7 +546,7 @@ export async function listStudioFrames(env: Env, origin: string, studioId: strin
 }
 
 export async function handleWebFrames(req: Request, env: Env, url: URL): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, ...(req.method === "GET" ? READ_FRAMES : ["frames.upload"]));
   if (req.method === "GET") {
     const frames = await listStudioFrames(env, url.origin, caller.studioId);
     return json({ success: true, frames }, 200, { "cache-control": "no-store" });
@@ -442,7 +584,7 @@ export async function handleWebFrames(req: Request, env: Env, url: URL): Promise
 }
 
 export async function handleWebFrameDetail(req: Request, env: Env, url: URL, frameId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, req.method === "DELETE" ? "frames.delete" : "frames.edit");
   if (!isSafeId(frameId, 8, 64)) throw new HttpError(400, "invalid_frame_id");
   const current = await env.DB.prepare(
     "SELECT object_key, preview_object_key, thumb_object_key FROM studio_frames WHERE id = ? AND studio_id = ?")
@@ -480,7 +622,7 @@ export async function handleWebFrameDetail(req: Request, env: Env, url: URL, fra
 }
 
 export async function handleWebFramesBulkDelete(req: Request, env: Env): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "frames.delete");
   const b = await readJson(req);
   const ids = Array.isArray(b.ids) ? b.ids.map((v) => str(v, 64)).filter((id) => isSafeId(id, 8, 64)).slice(0, 100) : [];
   if (ids.length === 0) throw new HttpError(400, "frame_ids_required");
@@ -496,86 +638,110 @@ export async function handleWebFramesBulkDelete(req: Request, env: Env): Promise
   return json({ success: true, deleted: rows.results?.length ?? 0 });
 }
 
-export async function handleWebCaptureSessions(req: Request, env: Env, url: URL): Promise<Response> {
-  const caller = await requireWebSession(req, env);
-  const limit = Math.min(100, Math.max(10, int(Number(url.searchParams.get("limit") ?? 50), 50)));
-  const cursor = decodeCursor(url.searchParams.get("cursor"));
-  const machineId = str(url.searchParams.get("machine_id"), 64);
-  const from = str(url.searchParams.get("from"), 40);
-  const to = str(url.searchParams.get("to"), 40);
+/**
+ * Session time in Vietnam local time ("YYYY-MM-DDTHH:MM:SS"). The booth sends started_at
+ * as local time without an offset; created_at (server, UTC) is the fallback.
+ */
+const SESSION_LOCAL_AT = "COALESCE(cs.started_at, strftime('%Y-%m-%dT%H:%M:%S', cs.created_at, '+7 hours'))";
+const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-  const where = ["cs.studio_id = ?"];
-  const bind: Array<string | number> = [caller.studioId];
-  if (machineId) {
-    if (!isSafeId(machineId, 8, 64)) throw new HttpError(400, "invalid_machine_id");
-    where.push("cs.machine_id = ?");
-    bind.push(machineId);
-  }
-  if (from) {
-    where.push("COALESCE(cs.started_at, cs.created_at) >= ?");
-    bind.push(from);
-  }
-  if (to) {
-    where.push("COALESCE(cs.started_at, cs.created_at) <= ?");
-    bind.push(to);
-  }
-  if (cursor) {
-    where.push("COALESCE(cs.started_at, cs.created_at) < ?");
-    bind.push(cursor);
+/**
+ * GET /v1/web/capture-sessions — the photo library: sessions that have at least one photo,
+ * newest first. day_no is the session's number within its day (1 = first of the day, across
+ * all the studio's machines), so it stays the same whatever the filter.
+ *   ?limit=10..100  ?machine_id=  ?from=YYYY-MM-DD  ?to=YYYY-MM-DD  ?no=<day_no>  ?cursor=
+ */
+export async function handleWebCaptureSessions(req: Request, env: Env, url: URL): Promise<Response> {
+  const caller = await requirePermission(req, env, "library.view");
+  const limit = Math.min(100, Math.max(10, int(Number(url.searchParams.get("limit") ?? 50), 50)));
+  const cursor = decodeCursor(url.searchParams.get("cursor")).split("\n");
+  const machineId = str(url.searchParams.get("machine_id"), 64);
+  const from = str(url.searchParams.get("from"), 10);
+  const to = str(url.searchParams.get("to"), 10);
+  const dayNo = int(Number(url.searchParams.get("no") ?? 0), 0);
+  if (machineId && !isSafeId(machineId, 8, 64)) throw new HttpError(400, "invalid_machine_id");
+  if ((from && !DAY_PATTERN.test(from)) || (to && !DAY_PATTERN.test(to))) throw new HttpError(400, "invalid_date");
+
+  // Days are numbered whole, so the date range can narrow the numbering itself.
+  const dayWhere: string[] = [];
+  const dayBind: string[] = [];
+  if (from) { dayWhere.push(`substr(${SESSION_LOCAL_AT}, 1, 10) >= ?`); dayBind.push(from); }
+  if (to) { dayWhere.push(`substr(${SESSION_LOCAL_AT}, 1, 10) <= ?`); dayBind.push(to); }
+
+  const where: string[] = [];
+  const bind: Array<string | number> = [];
+  if (machineId) { where.push("n.machine_id = ?"); bind.push(machineId); }
+  if (dayNo > 0) { where.push("n.day_no = ?"); bind.push(dayNo); }
+  if (cursor[0]) {
+    where.push("(n.local_at, n.machine_id, n.session_id) < (?, ?, ?)");
+    bind.push(cursor[0], cursor[1] ?? "", cursor[2] ?? "");
   }
 
   const rows = await env.DB.prepare(
-    `SELECT cs.machine_id, cs.session_id, cs.gallery_token, cs.event_id, cs.operation_mode, cs.status,
-            cs.photos_count, cs.expected_photos, cs.asset_sync_status, cs.started_at, cs.ended_at, cs.created_at, cs.updated_at,
+    `WITH photo_counts AS (
+       -- Ảnh chụp của phiên; không đếm bản xem (thumbnail/preview), manifest, ảnh ghép.
+       SELECT machine_id, session_id, COUNT(*) AS photos, MAX(committed_at) AS last_asset_at
+         FROM session_assets
+        WHERE studio_id = ? AND status = 'committed' AND kind = 'photo'
+        GROUP BY machine_id, session_id
+     ),
+     numbered AS (
+       SELECT cs.machine_id, cs.session_id, cs.studio_id, cs.gallery_token, cs.event_id, cs.operation_mode,
+              cs.status, cs.photos_count, cs.expected_photos, cs.asset_sync_status, cs.started_at, cs.ended_at,
+              cs.created_at, cs.updated_at, pc.photos, pc.last_asset_at,
+              ${SESSION_LOCAL_AT} AS local_at,
+              ROW_NUMBER() OVER (PARTITION BY substr(${SESSION_LOCAL_AT}, 1, 10)
+                                 ORDER BY ${SESSION_LOCAL_AT}, cs.machine_id, cs.session_id) AS day_no
+         FROM capture_sessions cs
+         JOIN photo_counts pc ON pc.machine_id = cs.machine_id AND pc.session_id = cs.session_id
+        WHERE cs.studio_id = ?${dayWhere.map((w) => ` AND ${w}`).join("")}
+     )
+     SELECT n.machine_id, n.session_id, n.gallery_token, n.event_id, n.operation_mode, n.status,
+            n.photos_count, n.expected_photos, n.asset_sync_status, n.started_at, n.ended_at, n.created_at,
+            n.updated_at, n.local_at, n.day_no, n.photos AS received_assets, n.last_asset_at,
             m.hwid, COALESCE(NULLIF(m.display_name, ''), m.device_name) AS device_name,
-            COUNT(DISTINCT CASE WHEN sa.status = 'committed' THEN sa.asset_id END) AS received_assets,
-            MAX(sa.committed_at) AS last_asset_at,
             (
               SELECT COALESCE(t.object_key, first_asset.object_key)
                 FROM session_assets first_asset
                 LEFT JOIN session_assets t
                   ON t.machine_id = first_asset.machine_id
                  AND t.session_id = first_asset.session_id
-                 AND t.photo_index = first_asset.photo_index
-                 AND t.kind = 'thumbnail'
+                 AND t.asset_id = 'thumb-' || first_asset.asset_id
                  AND t.status = 'committed'
-               WHERE first_asset.studio_id = cs.studio_id
-                 AND first_asset.machine_id = cs.machine_id
-                 AND first_asset.session_id = cs.session_id
+               WHERE first_asset.studio_id = n.studio_id
+                 AND first_asset.machine_id = n.machine_id
+                 AND first_asset.session_id = n.session_id
                  AND first_asset.status = 'committed'
-                 AND first_asset.kind IN ('photo','collage','video','other')
+                 AND first_asset.kind = 'photo'
                ORDER BY first_asset.photo_index ASC, first_asset.committed_at ASC, first_asset.asset_id ASC
                LIMIT 1
             ) AS thumbnail_object_key
-       FROM capture_sessions cs
-       JOIN machines m ON m.id = cs.machine_id
-       LEFT JOIN session_assets sa
-         ON sa.machine_id = cs.machine_id AND sa.session_id = cs.session_id
-      WHERE ${where.join(" AND ")}
-      GROUP BY cs.machine_id, cs.session_id
-      ORDER BY COALESCE(cs.started_at, cs.created_at) DESC
+       FROM numbered n
+       JOIN machines m ON m.id = n.machine_id
+      ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+      ORDER BY n.local_at DESC, n.machine_id DESC, n.session_id DESC
       LIMIT ?`)
-    .bind(...bind, limit + 1).all<Record<string, string | number>>();
+    .bind(caller.studioId, caller.studioId, ...dayBind, ...bind, limit + 1).all<Record<string, string | number>>();
 
   const results = rows.results ?? [];
   const page = await Promise.all(results.slice(0, limit).map(async (row) => {
-    const received = Number(row.received_assets || 0);
     const thumbnailKey = String(row.thumbnail_object_key || "");
     return {
       ...row,
-      received_assets: received,
-      thumbnail_url: thumbnailKey ? await signedMediaUrl(env, url.origin, thumbnailKey, 600) : "",
+      received_assets: Number(row.received_assets || 0),
+      day_no: Number(row.day_no || 0),
+      thumbnail_url: thumbnailKey ? await signedMediaUrl(env, url.origin, thumbnailKey, GALLERY_URL_TTL_SECONDS) : "",
     };
   }));
-  const last = page[page.length - 1];
-  const nextCursor = results.length > limit && last
-    ? encodeCursor(String(last.started_at || last.created_at || ""))
+  const last = results.length > limit ? results[limit - 1] : null;
+  const nextCursor = last
+    ? encodeCursor([String(last.local_at), String(last.machine_id), String(last.session_id)].join("\n"))
     : null;
   return json({ success: true, sessions: page, next_cursor: nextCursor }, 200, { "cache-control": "no-store" });
 }
 
 export async function handleWebCaptureAssets(req: Request, env: Env, url: URL, machineId: string, sessionId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "library.view");
   if (!isSafeId(machineId, 8, 64)) throw new HttpError(400, "invalid_machine_id");
   if (!isSafeId(sessionId, 1, 100)) throw new HttpError(400, "invalid_session_id");
   const own = await env.DB.prepare(
@@ -665,10 +831,13 @@ export async function handlePublicBookingOptions(env: Env, url: URL): Promise<Re
   }
   if (!studioId || !isSafeId(studioId, 8, 64)) throw new HttpError(404, "studio_not_found");
 
-  const rooms = await env.DB.prepare(
-    `SELECT id, name, description, capacity
-       FROM studio_rooms WHERE studio_id = ? AND status = 'active' ORDER BY created_at DESC`)
-    .bind(studioId).all();
+  const roomRows = await env.DB.prepare(
+    `SELECT ${ROOM_COLUMNS} FROM studio_rooms WHERE studio_id = ? AND status = 'active' ORDER BY created_at DESC`)
+    .bind(studioId).all<Record<string, unknown>>();
+  const rooms = { results: await Promise.all((roomRows.results ?? []).map(async (row) => {
+    const room = await roomRowToJson(env, url.origin, row);
+    return { id: room.id, name: room.name, description: room.description, capacity: room.capacity, cover_url: room.cover_url };
+  })) };
   const packages = await env.DB.prepare(
     `SELECT id, room_id, name, minutes, price_vnd, description
        FROM studio_packages WHERE studio_id = ? AND status = 'active' ORDER BY created_at DESC`)

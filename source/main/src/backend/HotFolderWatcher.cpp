@@ -4,11 +4,12 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QImageReader>
+#include <algorithm>
 
 namespace {
-constexpr int kArmedPollMs   = 400;    // quét khi đang chụp — độ trễ nhận ảnh ~0.4-0.8s
+constexpr int kArmedPollMs   = 250;    // quét khi đang chụp — độ trễ nhận ảnh ~0.25-0.5s
 constexpr int kIdlePollMs    = 2000;   // chỉ dò thư mục còn tồn tại
-constexpr int kStableMs      = 300;    // kích thước giữ nguyên ít nhất chừng này
+constexpr int kStableMs      = 250;    // kích thước giữ nguyên ít nhất chừng này
 constexpr int kGiveUpMs      = 15000;  // file ghi mãi không xong → bỏ qua
 constexpr int kDebounceMs    = 120;
 
@@ -50,7 +51,7 @@ bool HotFolderWatcher::start(const QString &dir)
     updatePresence();
     updatePollInterval();
     m_pollTimer.start();
-    qDebug() << "HotFolderWatcher: watching" << m_dir << "| present:" << m_dirPresent;
+    qWarning() << "HotFolderWatcher: watching" << m_dir << "| present:" << m_dirPresent;
     return m_dirPresent;
 }
 
@@ -82,10 +83,10 @@ void HotFolderWatcher::setArmed(bool armed)
         const QStringList existing = listJpegs(false);
         for (const QString &name : existing)
             m_baseline.insert(name);
-        qDebug() << "HotFolderWatcher: armed |" << m_baseline.size()
-                 << "existing file(s) ignored";
+        qWarning() << "HotFolderWatcher: armed |" << m_dir << "| present:" << m_dirPresent
+                   << "|" << m_baseline.size() << "existing file(s) ignored";
     } else {
-        qDebug() << "HotFolderWatcher: disarmed";
+        qWarning() << "HotFolderWatcher: disarmed";
     }
     updatePollInterval();
 }
@@ -115,7 +116,7 @@ void HotFolderWatcher::updatePresence()
         for (const QString &name : existing)
             m_baseline.insert(name);
     }
-    qDebug() << "HotFolderWatcher: folder" << m_dir << (present ? "available" : "missing");
+    qWarning() << "HotFolderWatcher: folder" << m_dir << (present ? "available" : "missing");
     emit watchingChanged(isWatching());
 }
 
@@ -152,15 +153,26 @@ void HotFolderWatcher::scan()
 
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     const QDir dir(m_dir);
-    // Cũ nhất trước → thứ tự _photo_NNN khớp thứ tự chụp.
-    const QStringList names = listJpegs(true);
-
+    // Chỉ stat + sắp xếp file MỚI: thư mục còn hàng nghìn ảnh cũ (baseline) thì
+    // sắp theo thời gian cả thư mục mỗi lần quét rất tốn.
+    const QStringList names = listJpegs(false);
+    struct Candidate { QString name; QString path; qint64 size; QDateTime modified; };
+    QList<Candidate> candidates;
     for (const QString &name : names) {
         if (m_baseline.contains(name) || m_handled.contains(name))
             continue;
-
         const QString path = dir.absoluteFilePath(name);
-        const qint64 size = QFileInfo(path).size();
+        const QFileInfo fi(path);
+        candidates.append({ name, path, fi.size(), fi.lastModified() });
+    }
+    // Cũ nhất trước → thứ tự _photo_NNN khớp thứ tự chụp.
+    std::stable_sort(candidates.begin(), candidates.end(),
+                     [](const Candidate &a, const Candidate &b) { return a.modified < b.modified; });
+
+    for (const Candidate &c : std::as_const(candidates)) {
+        const QString &name = c.name;
+        const QString &path = c.path;
+        const qint64 size = c.size;
 
         auto it = m_pending.find(name);
         if (it == m_pending.end()) {
@@ -169,6 +181,7 @@ void HotFolderWatcher::scan()
             p.firstSeenMs = now;
             p.lastChangeMs = now;
             m_pending.insert(name, p);
+            qWarning() << "HotFolderWatcher: new file seen" << path << "|" << size << "bytes";
             continue;
         }
 
@@ -178,9 +191,11 @@ void HotFolderWatcher::scan()
         } else if (size > 0 && now - it->lastChangeMs >= kStableMs) {
             QImageReader reader(path);
             if (reader.canRead()) {
+                const qint64 waitedMs = now - it->firstSeenMs;
                 m_pending.erase(it);
                 m_handled.insert(name);
-                qDebug() << "HotFolderWatcher: new photo" << path << "|" << size << "bytes";
+                qWarning() << "HotFolderWatcher: new photo ready" << path << "|" << size << "bytes"
+                           << "| waitedMs:" << waitedMs;
                 emit fileReady(path);
                 continue;
             }

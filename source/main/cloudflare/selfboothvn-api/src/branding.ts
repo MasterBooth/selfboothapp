@@ -8,7 +8,7 @@
 //   GET    /v1/public/gallery/:token/branding   (see publicGallery.ts)
 
 import { Env, HttpError, json, nowIso, readJson, str } from "./http";
-import { requireWebSession } from "./webAuth";
+import { requirePermission, requireWebSession } from "./webAuth";
 import { signedMediaUrl } from "./upload";
 
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
@@ -50,7 +50,8 @@ async function ensureRow(env: Env, studioId: string) {
 }
 
 export async function handleWebBranding(req: Request, env: Env, url: URL): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  // Everyone signed in reads it (the admin chrome wears the studio's look); saving needs brand.edit.
+  const caller = req.method === "GET" ? await requireWebSession(req, env) : await requirePermission(req, env, "brand.edit");
   if (req.method === "PUT") {
     const b = await readJson(req);
     const name = str(b.name, 80);
@@ -67,7 +68,7 @@ export async function handleWebBranding(req: Request, env: Env, url: URL): Promi
 }
 
 export async function handleWebBrandingLogo(req: Request, env: Env, url: URL): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, "brand.edit");
   const current = await env.DB.prepare("SELECT logo_object_key FROM studio_branding WHERE studio_id = ?")
     .bind(caller.studioId).first<{ logo_object_key: string | null }>();
 

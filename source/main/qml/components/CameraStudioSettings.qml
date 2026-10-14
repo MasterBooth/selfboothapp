@@ -27,6 +27,9 @@ Item {
 
     readonly property bool isHotFolder: cameraController.captureSource === "hotfolder"
     readonly property bool isFujiHotFolder: root.isHotFolder && cameraController.hotFolderKind === "fuji"
+    readonly property bool isTetherHotFolder: root.isHotFolder && cameraController.hotFolderKind === "tether"
+    // Kiểu do app Fuji nhận ảnh (HotFolder.exe / Tether App): thư mục do app quyết định.
+    readonly property bool isAppHotFolder: root.isFujiHotFolder || root.isTetherHotFolder
 
     function sourceIndex() {
         return root.isHotFolder ? 4
@@ -43,6 +46,9 @@ Item {
         case "fuji_starting":    return "Đang mở HotFolder"
         case "fuji_stopped":     return "HotFolder đã tắt"
         case "fuji_exe_missing": return "Không mở được HotFolder"
+        case "tether_starting":  return "Đang mở Tether App"
+        case "tether_stopped":   return "Tether App đã tắt"
+        case "tether_exe_missing": return "Không mở được Tether App"
         default:                 return "Chưa theo dõi"
         }
     }
@@ -50,7 +56,8 @@ Item {
     function hotFolderStatusColor() {
         var state = cameraController.hotFolderState
         return state === "watching" ? Theme.settingsSuccess
-             : (state === "fuji_starting" || state === "folder_unset") ? Theme.settingsWarning
+             : (state === "fuji_starting" || state === "tether_starting" || state === "folder_unset")
+               ? Theme.settingsWarning
              : Theme.settingsDanger
     }
 
@@ -62,6 +69,9 @@ Item {
         case "fuji_starting":    return "Chờ biểu tượng HotFolder hiện ở khay hệ thống."
         case "fuji_stopped":     return "Bấm Mở lại để tiếp tục nhận ảnh."
         case "fuji_exe_missing": return "Thiếu tools\\fuji_hotfolder\\HotFolder.exe."
+        case "tether_starting":  return "Đang đóng app cũ và mở Tether App (thu nhỏ trên taskbar)."
+        case "tether_stopped":   return "Bấm Mở lại để tiếp tục nhận ảnh."
+        case "tether_exe_missing": return "Không thấy FUJIFILM_TetherApp.exe — bấm Chọn exe."
         default:                 return ""
         }
     }
@@ -193,12 +203,14 @@ Item {
                     SettingRow {
                         title: "Kiểu hot folder"
                         detail: root.isFujiHotFolder ? "Mở FUJIFILM HotFolder, nhận ảnh khi bấm remote."
-                                                     : "Thư mục phần mềm chụp đang lưu ảnh."
+                              : root.isTetherHotFolder ? "Mở FUJIFILM Tether App thu nhỏ, ảnh lưu vào thư mục của BOOTHME."
+                              : "Thư mục phần mềm chụp đang lưu ảnh."
 
                         StudioSegmented {
                             options: [
                                 { text: "Thư mục ảnh", value: "folder" },
-                                { text: "Fujifilm", value: "fuji" }
+                                { text: "Fujifilm", value: "fuji" },
+                                { text: "Tether App", value: "tether" }
                             ]
                             value: cameraController.hotFolderKind
                             onPicked: (picked) => cameraController.setHotFolderKind(picked)
@@ -221,7 +233,9 @@ Item {
                             Text {
                                 text: cameraController.hotFolderPath !== ""
                                       ? cameraController.hotFolderPath
-                                      : (root.isFujiHotFolder ? "Đang đọc thư mục của HotFolder" : "Chưa chọn thư mục")
+                                      : (root.isFujiHotFolder ? "Đang đọc thư mục của HotFolder"
+                                         : root.isTetherHotFolder ? "Đang chuẩn bị thư mục Tether App"
+                                         : "Chưa chọn thư mục")
                                 color: cameraController.hotFolderPath !== "" ? Theme.settingsText : Theme.settingsTextMuted
                                 font.family: "Consolas"
                                 font.pixelSize: 15
@@ -231,18 +245,65 @@ Item {
                             }
 
                             SecondaryButton {
-                                text: root.isFujiHotFolder ? "Mở lại" : "Chọn thư mục"
-                                enabled: !root.isFujiHotFolder
+                                text: root.isAppHotFolder ? "Mở lại" : "Chọn thư mục"
+                                enabled: !root.isAppHotFolder
                                          || cameraController.hotFolderState === "fuji_stopped"
                                          || cameraController.hotFolderState === "fuji_exe_missing"
+                                         || cameraController.hotFolderState === "tether_stopped"
+                                         || cameraController.hotFolderState === "tether_exe_missing"
                                 Layout.preferredWidth: 132
                                 onClicked: {
-                                    if (root.isFujiHotFolder)
+                                    if (root.isAppHotFolder)
                                         cameraController.relaunchFujiHotFolder()
                                     else
                                         hotFolderDialog.open()
                                 }
                             }
+                        }
+                    }
+
+                    // Tether App: đường dẫn exe (bản đóng gói / bản cài / tự chọn).
+                    Rectangle {
+                        visible: root.isTetherHotFolder
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 68
+                        radius: 18
+                        color: Theme.settingsSurface
+                        border.color: Theme.settingsBorder
+                        border.width: 1
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 10
+
+                            Text {
+                                text: cameraController.tetherAppExePath !== ""
+                                      ? cameraController.tetherAppExePath
+                                      : "Chưa tìm thấy FUJIFILM_TetherApp.exe"
+                                color: cameraController.tetherAppExePath !== "" ? Theme.settingsText
+                                                                                 : Theme.settingsDanger
+                                font.family: "Consolas"
+                                font.pixelSize: 13
+                                Layout.fillWidth: true
+                                elide: Text.ElideMiddle
+                            }
+
+                            SecondaryButton {
+                                text: "Chọn exe"
+                                Layout.preferredWidth: 132
+                                onClicked: tetherExeDialog.open()
+                            }
+                        }
+                    }
+
+                    Platform.FileDialog {
+                        id: tetherExeDialog
+                        title: "Chọn FUJIFILM_TetherApp.exe"
+                        nameFilters: ["FUJIFILM Tether App (FUJIFILM_TetherApp.exe)", "Ứng dụng (*.exe)"]
+                        onAccepted: {
+                            cameraController.setTetherAppExePath(file.toString())
+                            root.notify("Đã lưu đường dẫn Tether App")
                         }
                     }
 
@@ -306,24 +367,36 @@ Item {
                     spacing: 10
 
                     SecondaryButton {
-                        text: "Quét webcam"
+                        text: cameraController.webcamScanning ? "Đang quét..." : "Quét webcam"
+                        enabled: !cameraController.webcamScanning
                         Layout.preferredWidth: 128
-                        onClicked: {
-                            var list = cameraController.scanWebcams()
-                            webcamCombo.model = list.length > 0 ? list : ["Không tìm thấy webcam"]
-                        }
+                        onClicked: cameraController.scanWebcams()
                     }
 
                     ComboBox {
                         id: webcamCombo
+                        property bool scanned: false
                         Layout.fillWidth: true
                         Layout.preferredHeight: 46
-                        model: cameraController.webcamList && cameraController.webcamList.length > 0
-                               ? cameraController.webcamList : ["Nhấn quét webcam"]
-                        onActivated: {
-                            if (model[currentIndex] !== "Nhấn quét webcam"
-                                    && model[currentIndex] !== "Không tìm thấy webcam")
-                                cameraController.startWebcamLiveView(currentIndex)
+                        enabled: !cameraController.webcamScanning
+                        model: cameraController.webcamScanning ? ["Đang quét..."]
+                             : cameraController.webcamList && cameraController.webcamList.length > 0
+                               ? cameraController.webcamList
+                               : [scanned ? "Không tìm thấy webcam" : "Nhấn quét webcam"]
+                        // Danh sách chỉ gồm thiết bị đọc được → vị trí ≠ index thiết bị.
+                        currentIndex: {
+                            cameraController.webcamList
+                            return Math.max(0, cameraController.webcamListIndexOf(
+                                                   cameraController.selectedWebcamIndex))
+                        }
+                        Connections {
+                            target: cameraController
+                            function onWebcamScanFinished(count) { webcamCombo.scanned = true }
+                        }
+                        onActivated: function(index) {
+                            var device = cameraController.webcamDeviceAt(index)
+                            if (device >= 0)
+                                cameraController.startWebcamLiveView(device)
                         }
                         background: Rectangle {
                             color: Theme.settingsSurface

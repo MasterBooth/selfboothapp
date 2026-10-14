@@ -20,10 +20,10 @@ declare global {
 }
 
 declare namespace VinextRouteTypes {
-  type PageRoute = "/" | "/booking" | "/compose" | "/compose/frames" | "/compose/photos" | "/gallery" | "/gallery/composed";
+  type PageRoute = "/" | "/booking" | "/compose" | "/compose/frames" | "/compose/photos" | "/gallery" | "/gallery/composed" | "/staff";
   type LayoutRoute = "/" | "/compose";
   type RouteHandlerRoute = never;
-  type AppRoute = "/" | "/booking" | "/compose" | "/compose/frames" | "/compose/photos" | "/gallery" | "/gallery/composed";
+  type AppRoute = "/" | "/booking" | "/compose" | "/compose/frames" | "/compose/photos" | "/gallery" | "/gallery/composed" | "/staff";
 
   interface ParamMap {
     "/": {};
@@ -33,6 +33,7 @@ declare namespace VinextRouteTypes {
     "/compose/photos": {};
     "/gallery": {};
     "/gallery/composed": {};
+    "/staff": {};
   }
 
   interface LayoutSlotMap {

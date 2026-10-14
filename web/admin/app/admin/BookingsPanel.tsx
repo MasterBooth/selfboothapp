@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { type ApiError, addDays, adminApi, clock, dayLabel, minutesOf, money } from "./api";
 import { downloadQr, qrPath } from "./qr";
+import type { Can } from "./permissions";
 
 type Room = { id: string; name: string; status: string };
 type PhotoPackage = { id: string; room_id: string; name: string; minutes: number; price_vnd: number; status: string };
@@ -47,10 +48,17 @@ const STATUS: Record<Status, { label: string; tone: string }> = {
 };
 
 const STATUS_ORDER: Status[] = ["pending", "confirmed", "done", "cancelled"];
+/** Moving a booking to a status needs this permission (same rule as the API). */
+const STATUS_PERMISSION: Record<Status, string> = {
+  pending: "bookings.edit",
+  confirmed: "bookings.confirm",
+  done: "bookings.checkin",
+  cancelled: "bookings.cancel",
+};
 
-type Props = { rooms: Room[]; packages: PhotoPackage[]; brandName: string };
+type Props = { rooms: Room[]; packages: PhotoPackage[]; brandName: string; can: Can };
 
-export function BookingsPanel({ rooms, packages, brandName }: Props) {
+export function BookingsPanel({ rooms, packages, brandName, can }: Props) {
   const [tab, setTab] = useState<"list" | "settings">("list");
   const [weekStart, setWeekStart] = useState("");
   const [day, setDay] = useState("");
@@ -201,9 +209,9 @@ export function BookingsPanel({ rooms, packages, brandName }: Props) {
         <button aria-selected={tab === "list"} className={tab === "list" ? "active" : ""} onClick={() => setTab("list")} role="tab" type="button">
           <CalendarDays size={17} />Lịch hẹn{pending > 0 ? <b>{pending}</b> : null}
         </button>
-        <button aria-selected={tab === "settings"} className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")} role="tab" type="button">
+        {can("bookings.settings") ? <button aria-selected={tab === "settings"} className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")} role="tab" type="button">
           <QrCode size={17} />Cài đặt & mã QR
-        </button>
+        </button> : null}
       </div>
 
       {error ? <p className="booking-error" role="alert">{error}</p> : null}
@@ -220,7 +228,7 @@ export function BookingsPanel({ rooms, packages, brandName }: Props) {
               <option value="all">Tất cả trạng thái</option>
               {STATUS_ORDER.map((status) => <option key={status} value={status}>{STATUS[status].label}</option>)}
             </select>
-            <button className="primary-action" disabled={activeRooms.length === 0} onClick={() => openDraft()} type="button"><Plus size={17} />Thêm lịch</button>
+            {can("bookings.create") ? <button className="primary-action" disabled={activeRooms.length === 0} onClick={() => openDraft()} type="button"><Plus size={17} />Thêm lịch</button> : null}
           </div>
 
           <div className="booking-week" role="tablist" aria-label="Ngày trong tuần">
@@ -270,10 +278,10 @@ export function BookingsPanel({ rooms, packages, brandName }: Props) {
                   ) : null}
                   <small>{b.code}{b.source === "admin" ? " · tại quầy" : b.customer_id ? " · tài khoản web" : ""}</small>
                   <div className="booking-row-actions">
-                    {b.status === "pending" ? <button onClick={() => setStatus(b, "confirmed")} type="button"><Check size={15} />Xác nhận</button> : null}
-                    {b.status === "confirmed" ? <button onClick={() => setStatus(b, "done")} type="button"><Check size={15} />Đã chụp</button> : null}
-                    {b.status === "pending" || b.status === "confirmed" ? <button className="danger" onClick={() => setStatus(b, "cancelled")} type="button"><X size={15} />Hủy</button> : null}
-                    <button onClick={() => openDraft(b)} type="button"><Pencil size={15} />Sửa</button>
+                    {b.status === "pending" && can("bookings.confirm") ? <button onClick={() => setStatus(b, "confirmed")} type="button"><Check size={15} />Xác nhận</button> : null}
+                    {b.status === "confirmed" && can("bookings.checkin") ? <button onClick={() => setStatus(b, "done")} type="button"><Check size={15} />Đã chụp</button> : null}
+                    {(b.status === "pending" || b.status === "confirmed") && can("bookings.cancel") ? <button className="danger" onClick={() => setStatus(b, "cancelled")} type="button"><X size={15} />Hủy</button> : null}
+                    {can("bookings.edit") ? <button onClick={() => openDraft(b)} type="button"><Pencil size={15} />Sửa</button> : null}
                   </div>
                 </div>
               </li>
@@ -351,7 +359,8 @@ export function BookingsPanel({ rooms, packages, brandName }: Props) {
               </label>
               <label>Trạng thái
                 <select onChange={(e) => setDraft({ ...draft, status: e.target.value as Status })} value={draft.status}>
-                  {STATUS_ORDER.map((status) => <option key={status} value={status}>{STATUS[status].label}</option>)}
+                  {STATUS_ORDER.filter((status) => status === bookings.find((item) => item.id === draft.id)?.status || can(STATUS_PERMISSION[status]))
+                    .map((status) => <option key={status} value={status}>{STATUS[status].label}</option>)}
                 </select>
               </label>
               <label className="wide">Ghi chú<textarea maxLength={500} onChange={(e) => setDraft({ ...draft, note: e.target.value })} rows={2} value={draft.note} /></label>

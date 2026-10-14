@@ -10,7 +10,8 @@
 //   GET   /v1/web/booking-settings · PUT /v1/web/booking-settings
 
 import { Env, HttpError, isSafeId, json, newId, nowIso, readJson, str } from "./http";
-import { requireWebSession } from "./webAuth";
+import { type WebCaller, requirePermission, requireWebSession } from "./webAuth";
+import { permissionLabel } from "./permissions";
 import { requireCustomer } from "./customers";
 
 const NO_STORE = { "cache-control": "no-store" };
@@ -197,7 +198,7 @@ async function adminBooking(env: Env, studioId: string, id: string) {
 }
 
 export async function handleWebBookings(req: Request, env: Env, url: URL): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, req.method === "POST" ? "bookings.create" : "bookings.view");
   if (req.method === "POST") return createByStaff(req, env, caller.studioId);
 
   const now = localNow();
@@ -242,6 +243,22 @@ async function createByStaff(req: Request, env: Env, studioId: string): Promise<
   return json({ success: true, booking: await adminBooking(env, studioId, id) }, 201, NO_STORE);
 }
 
+/** Which permission a booking PATCH needs: the status it moves to, and/or editing the details. */
+const STATUS_PERMISSION: Partial<Record<Status, string>> = {
+  confirmed: "bookings.confirm",
+  done: "bookings.checkin",
+  cancelled: "bookings.cancel",
+};
+const DETAIL_FIELDS = ["room_id", "package_id", "date", "start_minute", "name", "phone", "note"];
+
+function requireBookingChange(caller: WebCaller, current: Record<string, string | number>, b: Record<string, unknown>, status: string) {
+  const needed: string[] = [];
+  if (status !== String(current.status)) needed.push(STATUS_PERMISSION[status as Status] ?? "bookings.edit");
+  if (DETAIL_FIELDS.some((field) => b[field] !== undefined)) needed.push("bookings.edit");
+  const missing = needed.find((code) => !caller.permissions.has(code));
+  if (missing) throw new HttpError(403, "forbidden", `Bạn chưa được cấp quyền: ${permissionLabel(missing)}`);
+}
+
 export async function handleWebBookingDetail(req: Request, env: Env, bookingId: string): Promise<Response> {
   const caller = await requireWebSession(req, env);
   if (!isSafeId(bookingId, 8, 64)) throw new HttpError(400, "invalid_booking_id");
@@ -253,6 +270,7 @@ export async function handleWebBookingDetail(req: Request, env: Env, bookingId: 
   const b = await readJson(req);
   const status = b.status === undefined ? String(current.status) : str(b.status, 16);
   if (!STATUSES.includes(status as Status)) throw new HttpError(400, "invalid_status");
+  requireBookingChange(caller, current, b, status);
   const roomId = b.room_id === undefined ? String(current.room_id) : str(b.room_id, 64);
   const packageId = b.package_id === undefined ? String(current.package_id || "") : str(b.package_id, 64);
   const date = b.date === undefined ? String(current.booking_date) : str(b.date, 10);
@@ -281,7 +299,7 @@ export async function handleWebBookingDetail(req: Request, env: Env, bookingId: 
 }
 
 export async function handleWebBookingSettings(req: Request, env: Env): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, req.method === "PUT" ? "bookings.settings" : "bookings.view");
   if (req.method === "PUT") {
     const b = await readJson(req);
     const open = minuteValue(b.open_minute, "invalid_open_time");

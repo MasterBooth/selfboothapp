@@ -2,12 +2,21 @@
 
 export type ApiError = Error & { status?: number; code?: string };
 
+/**
+ * Which sign-in door this page is: `/staff…` = staff, otherwise the owner. The API keeps one
+ * session per door, so the owner and a staff member can be signed in on the same browser.
+ */
+export function portalHeaders(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  return { "x-sb-portal": window.location.pathname.startsWith("/staff") ? "staff" : "owner" };
+}
+
 export async function adminApi<T>(path: string, init: RequestInit = {}): Promise<T> {
   const isJsonBody = typeof init.body === "string";
   const response = await fetch(path, {
     ...init,
     credentials: "include",
-    headers: { ...(isJsonBody ? { "content-type": "application/json" } : {}), ...(init.headers ?? {}) },
+    headers: { ...portalHeaders(), ...(isJsonBody ? { "content-type": "application/json" } : {}), ...(init.headers ?? {}) },
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {

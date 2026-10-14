@@ -6,13 +6,15 @@ import {
   handleLogin, handleLogout, handleMachineRegister, handleMe, handleStudioRegister, requireAdmin,
 } from "./auth";
 import {
-  handleWebLogin, handleWebLogout, handleWebMachineRename, handleWebMachines, handleWebMe,
+  handleWebLogin, handleWebLogout, handleWebMachineRename, handleWebMachines, handleWebMe, handleWebPasswordChange,
 } from "./webAuth";
+import { handleStaffLogin, handleStaffPortal, handleWebStaff, handleWebStaffDetail } from "./staff";
+import { handleAuthConfig } from "./turnstile";
 import {
   handleWebCaptureAssets,
   handleWebCaptureSessions, handleWebFrameDetail, handleWebFramePreview, handleWebFrames, handleWebFramesBulkDelete,
   handlePublicBookingOptions, handleWebCodeDelete, handleWebCodeRevoke, handleWebCodes, handleWebCodesBulkDelete,
-  handleWebPackageDelete, handleWebPackages, handleWebRevenue, handleWebRoomDelete, handleWebRooms,
+  handleWebPackageDelete, handleWebPackages, handleWebRevenue, handleWebRoomCover, handleWebRoomDelete, handleWebRoomUpdate, handleWebRooms,
   handleWebSessionGalleryLink,
 } from "./webStudio";
 import { handleWebFilterDetail, handleWebFilters } from "./webFilters";
@@ -69,10 +71,16 @@ async function route(req: Request, env: Env, url: URL, ctx: ExecutionContext): P
   if (is("POST", "web", "auth", "login")) return handleWebLogin(req, env);
   if (is("GET", "web", "auth", "me")) return handleWebMe(req, env);
   if (is("POST", "web", "auth", "logout")) return handleWebLogout(req, env);
+  if (is("POST", "web", "auth", "password")) return handleWebPasswordChange(req, env);
+  if (is("POST", "web", "staff", "login")) return handleStaffLogin(req, env);
+  if ((method === "GET" || method === "POST") && is(method, "web", "staff")) return handleWebStaff(req, env);
+  if ((method === "PATCH" || method === "DELETE") && is(method, "web", "staff", "*")) return handleWebStaffDetail(req, env, p[2]);
+  if (is("GET", "public", "auth-config")) return handleAuthConfig(env);
+  if (is("GET", "public", "staff-portal", "*")) return handleStaffPortal(env, url, p[2]);
   if (is("GET", "web", "machines")) return handleWebMachines(req, env);
   if (is("PATCH", "web", "machines", "*")) return handleWebMachineRename(req, env, p[2]);
   if ((method === "GET" || method === "POST") && p.length === 2 && p[0] === "web" && p[1] === "rooms") {
-    return handleWebRooms(req, env);
+    return handleWebRooms(req, env, url);
   }
   if ((method === "GET" || method === "POST") && p.length === 2 && p[0] === "web" && p[1] === "packages") {
     return handleWebPackages(req, env);
@@ -84,6 +92,8 @@ async function route(req: Request, env: Env, url: URL, ctx: ExecutionContext): P
   if (is("POST", "web", "codes", "bulk-delete")) return handleWebCodesBulkDelete(req, env);
   if (is("DELETE", "web", "codes", "*")) return handleWebCodeDelete(req, env, p[2]);
   if (is("DELETE", "web", "rooms", "*")) return handleWebRoomDelete(req, env, p[2]);
+  if (is("PATCH", "web", "rooms", "*")) return handleWebRoomUpdate(req, env, url, p[2]);
+  if ((method === "PUT" || method === "DELETE") && is(method, "web", "rooms", "*", "cover")) return handleWebRoomCover(req, env, url, p[2]);
   if (is("DELETE", "web", "packages", "*")) return handleWebPackageDelete(req, env, p[2]);
   if ((method === "GET" || method === "POST") && is(method, "web", "frames")) return handleWebFrames(req, env, url);
   if (is("POST", "web", "frames", "bulk-delete")) return handleWebFramesBulkDelete(req, env);

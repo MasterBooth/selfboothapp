@@ -87,9 +87,9 @@ WebcamLiveView::~WebcamLiveView()
     stop();
 }
 
-QStringList WebcamLiveView::scanDevices()
+QList<int> WebcamLiveView::scanDevices()
 {
-    QStringList devices;
+    QList<int> devices;
 
 #ifdef USE_WEBCAM_LIVEVIEW
     for (int i = 0; i < 10; ++i) {
@@ -101,11 +101,11 @@ QStringList WebcamLiveView::scanDevices()
             cap.read(frame);
             cap.release();
             if (!frame.empty()) {
-                devices.append(QString("Camera %1").arg(i));
+                devices.append(i);
             }
         }
     }
-    qDebug() << "WebcamLiveView: found" << devices.size() << "device(s)";
+    qDebug() << "WebcamLiveView: found" << devices.size() << "device(s)" << devices;
 #else
     qDebug() << "WebcamLiveView: built without OpenCV — no devices available";
 #endif
@@ -133,11 +133,14 @@ bool WebcamLiveView::start(int deviceIndex)
 
 void WebcamLiveView::stop()
 {
-    if (m_running.exchange(false)) {
-        if (m_thread.joinable())
-            m_thread.join();
+    const bool wasRunning = m_running.exchange(false);
+    // Luôn join: luồng có thể đã TỰ thoát (không mở được thiết bị / mất tín hiệu
+    // HDMI) với m_running = false nhưng std::thread vẫn joinable. Gán đè thread
+    // mới lên nó trong start() → std::terminate() → app tắt ngay.
+    if (m_thread.joinable())
+        m_thread.join();
+    if (wasRunning)
         qDebug() << "WebcamLiveView: stopped";
-    }
 }
 
 void WebcamLiveView::captureLoop()
@@ -146,7 +149,8 @@ void WebcamLiveView::captureLoop()
     cv::VideoCapture cap;
     if (!cap.open(m_deviceIndex, cv::CAP_DSHOW)) {
         qWarning() << "WebcamLiveView: cannot open device" << m_deviceIndex;
-        m_running.store(false);
+        if (m_running.exchange(false))
+            emit streamEnded();
         return;
     }
 
@@ -251,6 +255,9 @@ void WebcamLiveView::captureLoop()
     }
 
     cap.release();
-    m_running.store(false);
+    // Tự thoát (mất tín hiệu / thiết bị bị giành) chứ không phải stop() → báo
+    // CameraController cập nhật isLiveViewActive.
+    if (m_running.exchange(false))
+        emit streamEnded();
 #endif
 }

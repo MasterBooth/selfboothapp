@@ -4,6 +4,7 @@
 #include "WebcamLiveView.h"
 #include "HotFolderWatcher.h"
 #include "FujiHotFolderProcess.h"
+#include "FujiTetherAppProcess.h"
 #include "EventManager.h"
 #include <QCoreApplication>
 #include <QDebug>
@@ -27,6 +28,7 @@
 #include <QSettings>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
+#include <QFutureWatcher>
 #include <chrono>
 #include <algorithm>
 
@@ -56,6 +58,17 @@ static QString normalizeCameraType(const QString &type)
 static QString normalizeSdkType(const std::string &sdkType)
 {
     return normalizeCameraType(QString::fromStdString(sdkType));
+}
+
+// Kiểu hot folder: "folder" (thư mục ảnh), "fuji" (HotFolder.exe), "tether" (Tether App).
+static QString normalizeHotFolderKind(const QString &kind)
+{
+    const QString k = kind.trimmed();
+    if (k.compare("fuji", Qt::CaseInsensitive) == 0)
+        return QStringLiteral("fuji");
+    if (k.compare("tether", Qt::CaseInsensitive) == 0)
+        return QStringLiteral("tether");
+    return QStringLiteral("folder");
 }
 
 // Fuji X SDK live view can stay at ~1024px even when SIZE_L is requested.
@@ -152,14 +165,17 @@ CameraController::CameraController(QObject *parent)
         // động (main.cpp) sẽ tự theo dõi lại thay vì kết nối SDK.
         m_captureSource   = qs.value("capture_source", "sdk").toString() == "hotfolder"
                             ? QStringLiteral("hotfolder") : QStringLiteral("sdk");
-        m_hotFolderKind   = qs.value("hotfolder_kind", "folder").toString() == "fuji"
-                            ? QStringLiteral("fuji") : QStringLiteral("folder");
+        m_hotFolderKind   = normalizeHotFolderKind(qs.value("hotfolder_kind", "folder").toString());
         m_hotFolderFolder = qs.value("hotfolder_folder_path").toString();
+        m_tetherAppExe    = qs.value("tetherapp_exe_path").toString();
         if (isHotFolderSource())
             m_useWebcamLiveView = true;   // Hot Folder không có live view SDK
     }
 
-    m_hotFolderPool.setMaxThreadCount(1);
+    // 2 luồng: chụp liên tiếp thì ảnh sau không phải chờ ảnh trước lật xong.
+    // Thứ tự phát imageCaptured vẫn giữ nhờ số thứ tự (finishHotFolderImport).
+    // Không hơn 2: mỗi ảnh 40MP giải mã chiếm ~160 MB RAM.
+    m_hotFolderPool.setMaxThreadCount(2);
     m_hotFolderWatcher = new HotFolderWatcher(this);
     connect(m_hotFolderWatcher, &HotFolderWatcher::watchingChanged,
             this, [this]() { refreshHotFolderState(); });
@@ -176,10 +192,18 @@ CameraController::CameraController(QObject *parent)
         if (isHotFolderSource() && m_hotFolderKind == QLatin1String("fuji"))
             setHotFolderPathInternal(folder);
     });
-    // Thoát app → tắt HotFolder.exe để nhả máy ảnh (lần mở sau app tự mở lại).
+    m_tetherApp = new FujiTetherAppProcess(this);
+    connect(m_tetherApp, &FujiTetherAppProcess::runningChanged, this, [this](bool) {
+        refreshHotFolderState();
+    });
+    // Thoát app → tắt HotFolder.exe / Tether App để nhả máy ảnh (lần mở sau app tự mở lại).
     connect(qApp, &QCoreApplication::aboutToQuit, this, [this]() {
-        if (isHotFolderSource() && m_hotFolderKind == QLatin1String("fuji"))
+        if (!isHotFolderSource())
+            return;
+        if (m_hotFolderKind == QLatin1String("fuji"))
             FujiHotFolderProcess::shutdown();
+        else if (m_hotFolderKind == QLatin1String("tether"))
+            FujiTetherAppProcess::shutdown();
     });
 
     camera.setPreferredBrand(m_cameraType.toStdString());
@@ -253,9 +277,9 @@ void CameraController::loadPersistedCameraSettings()
     m_captureSource = loadCameraSetting(qs, QStringLiteral("capture_source"), m_captureSource)
                               .trimmed().compare(QStringLiteral("hotfolder"), Qt::CaseInsensitive) == 0
                       ? QStringLiteral("hotfolder") : QStringLiteral("sdk");
-    m_hotFolderKind = loadCameraSetting(qs, QStringLiteral("hotfolder_kind"), m_hotFolderKind)
-                              .trimmed().compare(QStringLiteral("fuji"), Qt::CaseInsensitive) == 0
-                      ? QStringLiteral("fuji") : QStringLiteral("folder");
+    m_hotFolderKind = normalizeHotFolderKind(
+        loadCameraSetting(qs, QStringLiteral("hotfolder_kind"), m_hotFolderKind));
+    m_tetherAppExe = loadCameraSetting(qs, QStringLiteral("tetherapp_exe_path"), m_tetherAppExe).trimmed();
 
     QString hotFolderFolder = loadCameraSetting(qs, QStringLiteral("hotfolder_folder_path"),
                                                 m_hotFolderFolder).trimmed();
@@ -278,6 +302,8 @@ void CameraController::loadPersistedCameraSettings()
     persistCameraSetting(QStringLiteral("capture_source"), m_captureSource);
     persistCameraSetting(QStringLiteral("hotfolder_kind"), m_hotFolderKind);
     persistCameraSetting(QStringLiteral("hotfolder_folder_path"), m_hotFolderFolder);
+    persistCameraSetting(QStringLiteral("tetherapp_exe_path"), m_tetherAppExe);
+    emit tetherAppExePathChanged();
     persistCameraSetting(QStringLiteral("liveview_source"), m_useWebcamLiveView
                          ? QStringLiteral("webcam") : QStringLiteral("sdk"));
     persistCameraSetting(QStringLiteral("liveview_webcam_index"),
@@ -1480,20 +1506,75 @@ void CameraController::ensureWebcamLiveView()
     // kéo frame mới nhất từ LiveViewImageProvider (giống SDK path)
     connect(m_webcamLiveView.get(), &WebcamLiveView::frameReady,
             this, [this]() { emit frameReady(QImage{}); }, Qt::QueuedConnection);
+    connect(m_webcamLiveView.get(), &WebcamLiveView::streamEnded,
+            this, [this]() {
+                qWarning() << "CameraController: webcam live view ended unexpectedly";
+                emit isLiveViewActiveChanged();
+            }, Qt::QueuedConnection);
 }
 
-QStringList CameraController::scanWebcams()
+void CameraController::scanWebcams()
 {
+    if (m_webcamScanning)
+        return;
     ensureWebcamLiveView();
 
-    m_webcamList = m_webcamLiveView->scanDevices();
-    emit webcamListChanged();
-    return m_webcamList;
+    // Nhả thiết bị đang stream trước khi quét: DirectShow mở lại thiết bị đang
+    // dùng sẽ thất bại hoặc làm luồng đang chạy đọc lỗi. Quét xong chạy lại.
+    m_webcamResumeIndex = m_webcamLiveView->isActive() ? m_webcamLiveView->currentDeviceIndex()
+                                                       : m_selectedWebcamIndex;
+    stopWebcamLiveView();
+
+    m_webcamScanning = true;
+    emit webcamScanningChanged();
+
+    // Watcher thuộc về this → nếu CameraController bị huỷ trước khi quét xong,
+    // kết quả bị bỏ qua thay vì gọi vào object đã chết.
+    auto *watcher = new QFutureWatcher<QList<int>>(this);
+    connect(watcher, &QFutureWatcher<QList<int>>::finished, this, [this, watcher]() {
+        watcher->deleteLater();
+        m_webcamDevices = watcher->result();
+        m_webcamList.clear();
+        for (int device : std::as_const(m_webcamDevices))
+            m_webcamList.append(QStringLiteral("Camera %1").arg(device));
+        emit webcamListChanged();
+
+        m_webcamScanning = false;
+        emit webcamScanningChanged();
+
+        const int resume = m_webcamResumeIndex;
+        m_webcamResumeIndex = -1;
+        if (m_useWebcamLiveView && resume >= 0 && m_webcamDevices.contains(resume))
+            startWebcamLiveView(resume);
+        emit webcamScanFinished(m_webcamList.size());
+    });
+    watcher->setFuture(QtConcurrent::run(&WebcamLiveView::scanDevices));
+}
+
+int CameraController::webcamDeviceAt(int listIndex) const
+{
+    return (listIndex >= 0 && listIndex < m_webcamDevices.size())
+           ? m_webcamDevices.at(listIndex) : -1;
+}
+
+int CameraController::webcamListIndexOf(int deviceIndex) const
+{
+    return m_webcamDevices.indexOf(deviceIndex);
 }
 
 bool CameraController::startWebcamLiveView(int deviceIndex)
 {
+    if (deviceIndex < 0)
+        return false;
     ensureWebcamLiveView();
+
+    // Đang quét: thiết bị đang bị mở thử ở luồng nền → chạy sau khi quét xong.
+    if (m_webcamScanning) {
+        m_webcamResumeIndex = deviceIndex;
+        qDebug() << "CameraController: webcam scan in progress - start of device"
+                 << deviceIndex << "deferred";
+        return true;
+    }
 
     // Dừng SDK live view stream để nhả LiveViewImageProvider (giữ kết nối camera
     // → chụp ảnh & chỉnh thông số vẫn hoạt động bình thường).
@@ -1519,10 +1600,13 @@ bool CameraController::startWebcamLiveView(int deviceIndex)
 
 void CameraController::stopWebcamLiveView()
 {
-    if (m_webcamLiveView && m_webcamLiveView->isActive()) {
-        m_webcamLiveView->stop();
+    if (!m_webcamLiveView)
+        return;
+    const bool wasActive = m_webcamLiveView->isActive();
+    // Gọi stop() cả khi luồng đã tự dừng để join nó (xem WebcamLiveView::stop).
+    m_webcamLiveView->stop();
+    if (wasActive)
         emit isLiveViewActiveChanged();
-    }
 }
 
 void CameraController::setUseWebcamLiveView(bool use)
@@ -1549,9 +1633,15 @@ void CameraController::setUseWebcamLiveView(bool use)
         else
             emit isLiveViewActiveChanged();
     } else {
-        // Chuyển về SDK: dừng webcam nếu đang chạy, rồi khởi động lại SDK live view
+        // Chuyển về SDK: dừng webcam nếu đang chạy, rồi khởi động lại SDK live view.
+        // Máy đang kết nối / chưa kết nối: KHÔNG gọi SDK từ luồng UI (đụng lệnh
+        // connect đang chạy trên m_camPool); connectAsync() thành công tự startLiveView().
         stopWebcamLiveView();
-        startLiveView();
+        m_webcamResumeIndex = -1;
+        if (!m_isConnecting.load() && CameraBackend::camera().isConnected())
+            startLiveView();
+        else
+            qDebug() << "CameraController: SDK live view deferred until camera connects";
         emit isLiveViewActiveChanged();
     }
 }
@@ -1596,8 +1686,10 @@ void CameraController::onWatchdogTimeout()
     }
 
     if (!lost) {
-        // Kết nối lành mạnh → reset cờ throttle để lần mất kết nối sau lại log.
+        // Kết nối lành mạnh → reset cờ throttle để lần mất kết nối sau lại log
+        // và thử kết nối lại ngay.
         m_watchdogLoggedDisconnect = false;
+        m_lastReconnectAttemptMs = 0;
 
         // ── Keep-alive chủ động ──────────────────────────────────────────────
         // Gửi ExtendShutDownTimer định kỳ để máy ảnh/USB không tự ngủ khi idle
@@ -1631,9 +1723,15 @@ void CameraController::onWatchdogTimeout()
 
     if (!m_watchdogLoggedDisconnect) {
         qWarning() << "CameraController: Watchdog detected disconnection ("
-                   << reason << ") — attempting reconnect...";
+                   << reason << ") — auto reconnect every"
+                   << m_reconnectIntervalMs / 1000 << "s";
         m_watchdogLoggedDisconnect = true;
     }
+
+    const qint64 now = QDateTime::currentMSecsSinceEpoch();
+    if (m_lastReconnectAttemptMs > 0 && now - m_lastReconnectAttemptMs < m_reconnectIntervalMs)
+        return;
+    m_lastReconnectAttemptMs = now;
 
     // connectAsync() set m_isConnecting=true ngay (single-flight), chạy detection
     // + connect trên m_camPool nền nên KHÔNG block UI; thành công sẽ tự startLiveView().
@@ -1986,18 +2084,23 @@ bool CameraController::mirrorJpegInPlace(const QString &path)
     const QFileInfo beforeInfo(path);
     const qint64 beforeBytes = beforeInfo.exists() ? beforeInfo.size() : -1;
 
+    QElapsedTimer timer;
+    timer.start();
+
     QImageReader reader(path);
     // QImageWriter không ghi lại EXIF → xoay theo Orientation trước, nếu không
     // ảnh dọc sẽ nằm ngang sau khi lật.
     reader.setAutoTransform(true);
-    const QImage image = reader.read();
-    if (image.isNull()) {
+    QImage mirrored = reader.read();
+    if (mirrored.isNull()) {
         qWarning() << "CameraController: Mirror skipped; failed to load image" << path
                    << "| beforeBytes:" << beforeBytes << "|" << reader.errorString();
         return false;
     }
+    const qint64 decodeMs = timer.elapsed();
 
-    const QImage mirrored = image.mirrored(true, false);
+    // Lật tại chỗ: không cấp thêm một bản sao full-size (40MP ≈ 160 MB).
+    mirrored.flip(Qt::Horizontal);
     const QString suffix = beforeInfo.suffix().toLower();
     const QByteArray format = (suffix == "jpeg" || suffix == "jpg")
                               ? suffix.toLatin1() : QByteArray("jpg");
@@ -2012,11 +2115,13 @@ bool CameraController::mirrorJpegInPlace(const QString &path)
         return false;
     }
 
-    qDebug() << "CameraController: Mirror applied to" << path
-             << "| imageSize:" << mirrored.size()
-             << "| quality:" << kMirrorJpegQuality
-             << "| beforeBytes:" << beforeBytes
-             << "| afterBytes:" << QFileInfo(path).size();
+    qWarning() << "CameraController: Mirror applied to" << path
+               << "| imageSize:" << mirrored.size()
+               << "| quality:" << kMirrorJpegQuality
+               << "| decodeMs:" << decodeMs
+               << "| totalMs:" << timer.elapsed()
+               << "| beforeBytes:" << beforeBytes
+               << "| afterBytes:" << QFileInfo(path).size();
     return true;
 }
 
@@ -2027,9 +2132,11 @@ bool CameraController::mirrorJpegInPlace(const QString &path)
 QString CameraController::cameraModel() const
 {
     if (isHotFolderSource()) {
-        return m_hotFolderKind == QLatin1String("fuji")
-               ? QStringLiteral("Hot Folder · Fujifilm")
-               : QStringLiteral("Hot Folder · Thư mục ảnh");
+        if (m_hotFolderKind == QLatin1String("fuji"))
+            return QStringLiteral("Hot Folder · Fujifilm");
+        if (m_hotFolderKind == QLatin1String("tether"))
+            return QStringLiteral("Hot Folder · Fujifilm Tether App");
+        return QStringLiteral("Hot Folder · Thư mục ảnh");
     }
     return m_cameraModel;
 }
@@ -2076,7 +2183,7 @@ void CameraController::leaveHotFolder()
 {
     qWarning() << "CameraController: capture source -> SDK";
 
-    stopHotFolder(m_hotFolderKind == QLatin1String("fuji"));
+    stopHotFolder(true);
 
     m_captureSource = QStringLiteral("sdk");
     persistCameraSetting(QStringLiteral("capture_source"), m_captureSource);
@@ -2134,7 +2241,10 @@ void CameraController::startHotFolder()
         return;
 
     m_fujiLaunchFailed = false;
+    m_tetherLaunchFailed = false;
     if (m_hotFolderKind == QLatin1String("fuji")) {
+        m_tetherApp->stopMonitoring();
+        m_tetherStarting = false;
         m_fujiHotFolder->startMonitoring();
         setHotFolderPathInternal(m_fujiHotFolder->folder());
 
@@ -2144,6 +2254,9 @@ void CameraController::startHotFolder()
             } else {
                 m_fujiStarting = true;
                 (void)QtConcurrent::run(&m_camPool, [this]() {
+                    // Hai app Fuji không cùng giữ được máy ảnh.
+                    if (FujiTetherAppProcess::isRunning())
+                        FujiTetherAppProcess::shutdown();
                     const bool ok = m_fujiHotFolder->launch();
                     QMetaObject::invokeMethod(this, [this, ok]() {
                         if (!ok) {
@@ -2162,9 +2275,63 @@ void CameraController::startHotFolder()
                 });
             }
         }
+    } else if (m_hotFolderKind == QLatin1String("tether")) {
+        m_fujiHotFolder->stopMonitoring();
+        m_fujiStarting = false;
+        m_tetherApp->startMonitoring();
+
+        // Thư mục do BOOTHME quản lý, ghi vào cài đặt Tether App trước khi mở app.
+        const QString folder = FujiTetherAppProcess::receiveFolder();
+        QDir().mkpath(folder);
+        setHotFolderPathInternal(folder);
+
+        const QString exe = FujiTetherAppProcess::locateExe(m_tetherAppExe);
+        if (exe.isEmpty()) {
+            m_tetherLaunchFailed = true;
+            qWarning() << "CameraController: FUJIFILM_TetherApp.exe not found";
+        } else if (!m_tetherStarting) {
+            m_tetherStarting = true;
+            // Trên m_camPool: xếp SAU lệnh nhả SDK (releaseSdkForHotFolder) → không tranh USB.
+            (void)QtConcurrent::run(&m_camPool, [this, exe, folder]() {
+                // Hai app Fuji không cùng giữ được máy ảnh.
+                if (FujiHotFolderProcess::isRunning())
+                    FujiHotFolderProcess::shutdown();
+
+                // Tether App chỉ đọc thư mục đích lúc mở → đang chạy với thư mục khác
+                // thì đóng để ghi lại.
+                if (FujiTetherAppProcess::isRunning()) {
+                    const QString current = FujiTetherAppProcess::configuredFolder();
+                    if (!current.isEmpty() && current.compare(folder, Qt::CaseInsensitive) != 0)
+                        FujiTetherAppProcess::shutdown();
+                }
+
+                QString watchFolder = folder;
+                if (!FujiTetherAppProcess::isRunning()
+                        && FujiTetherAppProcess::applySaveFolder(folder) == 0) {
+                    // Chưa có cài đặt (Tether App chưa từng chạy) → theo thư mục nó đang
+                    // dùng nếu đọc được; lần mở sau (đã có cài đặt) sẽ ghi được thư mục.
+                    const QString current = FujiTetherAppProcess::configuredFolder();
+                    if (!current.isEmpty())
+                        watchFolder = current;
+                }
+
+                const bool ok = FujiTetherAppProcess::launch(exe);
+                QMetaObject::invokeMethod(this, [this, ok, watchFolder]() {
+                    m_tetherStarting = false;
+                    if (!isHotFolderSource() || m_hotFolderKind != QLatin1String("tether"))
+                        return;
+                    m_tetherLaunchFailed = !ok;
+                    m_tetherApp->startMonitoring();   // cập nhật trạng thái chạy ngay
+                    setHotFolderPathInternal(watchFolder);
+                    refreshHotFolderState();
+                }, Qt::QueuedConnection);
+            });
+        }
     } else {
         m_fujiHotFolder->stopMonitoring();
         m_fujiStarting = false;
+        m_tetherApp->stopMonitoring();
+        m_tetherStarting = false;
         setHotFolderPathInternal(m_hotFolderFolder);
     }
 
@@ -2175,33 +2342,41 @@ void CameraController::startHotFolder()
     refreshHotFolderState();
 }
 
-void CameraController::stopHotFolder(bool closeFujiApp)
+void CameraController::stopHotFolder(bool closeApp)
 {
     m_hotFolderWatcher->setArmed(false);
     m_hotFolderWatcher->stop();
     m_fujiHotFolder->stopMonitoring();
     m_fujiStarting = false;
     m_fujiLaunchFailed = false;
+    m_tetherApp->stopMonitoring();
+    m_tetherLaunchFailed = false;
 
-    if (closeFujiApp) {
-        // Chờ app Fuji tự XSDK_Close (≤ 4s) trên m_camPool → lần connect SDK xếp
-        // sau trong pool chỉ chạy khi máy ảnh đã được nhả, UI không bị treo.
+    if (!closeApp)
+        return;
+    // Chờ app Fuji tự nhả máy ảnh (HotFolder ≤ 4s, Tether App ≤ 5s) trên m_camPool →
+    // lần connect SDK / mở app khác xếp sau trong pool chỉ chạy khi máy đã được nhả,
+    // UI không bị treo.
+    if (m_hotFolderKind == QLatin1String("fuji")) {
         (void)QtConcurrent::run(&m_camPool, []() {
             FujiHotFolderProcess::shutdown();
+        });
+    } else if (m_hotFolderKind == QLatin1String("tether")) {
+        (void)QtConcurrent::run(&m_camPool, []() {
+            FujiTetherAppProcess::shutdown();
         });
     }
 }
 
 void CameraController::setHotFolderKind(const QString &kind)
 {
-    const QString k = kind.trimmed().compare("fuji", Qt::CaseInsensitive) == 0
-                      ? QStringLiteral("fuji") : QStringLiteral("folder");
+    const QString k = normalizeHotFolderKind(kind);
     if (k == m_hotFolderKind)
         return;
 
-    const bool wasFuji = m_hotFolderKind == QLatin1String("fuji");
+    // Tắt app của kiểu cũ (gọi trước khi đổi m_hotFolderKind).
     if (isHotFolderSource())
-        stopHotFolder(wasFuji);
+        stopHotFolder(true);
 
     m_hotFolderKind = k;
     persistCameraSetting(QStringLiteral("hotfolder_kind"), m_hotFolderKind);
@@ -2232,9 +2407,33 @@ void CameraController::setHotFolderFolder(const QString &path)
 
 void CameraController::relaunchFujiHotFolder()
 {
-    if (!isHotFolderSource() || m_hotFolderKind != QLatin1String("fuji"))
+    if (!isHotFolderSource() || m_hotFolderKind == QLatin1String("folder"))
         return;
     startHotFolder();
+}
+
+QString CameraController::tetherAppExePath() const
+{
+    return FujiTetherAppProcess::locateExe(m_tetherAppExe);
+}
+
+void CameraController::setTetherAppExePath(const QString &path)
+{
+    QString local = path.trimmed();
+    if (local.startsWith("file:", Qt::CaseInsensitive))
+        local = QUrl(local).toLocalFile();
+    local = local.isEmpty() ? QString() : QDir::toNativeSeparators(QDir::cleanPath(local));
+    if (local == m_tetherAppExe)
+        return;
+
+    m_tetherAppExe = local;
+    persistCameraSetting(QStringLiteral("tetherapp_exe_path"), m_tetherAppExe);
+    qWarning() << "CameraController: Tether App exe set to" << m_tetherAppExe
+               << "| resolved:" << tetherAppExePath();
+    emit tetherAppExePathChanged();
+
+    if (isHotFolderSource() && m_hotFolderKind == QLatin1String("tether"))
+        startHotFolder();
 }
 
 void CameraController::setHotFolderArmed(bool armed)
@@ -2272,6 +2471,17 @@ void CameraController::refreshHotFolderState()
                 state = QStringLiteral("folder_missing");
             else
                 state = QStringLiteral("watching");
+        } else if (m_hotFolderKind == QLatin1String("tether")) {
+            if (m_tetherLaunchFailed)
+                state = QStringLiteral("tether_exe_missing");
+            else if (m_tetherStarting)
+                state = QStringLiteral("tether_starting");
+            else if (!m_tetherApp->running())
+                state = QStringLiteral("tether_stopped");
+            else if (!watching)
+                state = QStringLiteral("folder_missing");
+            else
+                state = QStringLiteral("watching");
         } else {
             if (m_hotFolderPath.isEmpty())
                 state = QStringLiteral("folder_unset");
@@ -2285,7 +2495,7 @@ void CameraController::refreshHotFolderState()
 
     if (state != m_hotFolderState) {
         m_hotFolderState = state;
-        qDebug() << "CameraController: hot folder state =" << state << "|" << m_hotFolderPath;
+        qWarning() << "CameraController: hot folder state =" << state << "|" << m_hotFolderPath;
         emit hotFolderStateChanged();
     }
     if (ready != m_hotFolderReady) {
@@ -2303,8 +2513,10 @@ bool CameraController::hotFolderBusy() const
 
 void CameraController::onHotFolderFileReady(const QString &path)
 {
-    if (!isHotFolderSource() || !m_hotFolderWatcher->isArmed())
+    if (!isHotFolderSource() || !m_hotFolderWatcher->isArmed()) {
+        qWarning() << "CameraController: hot folder photo ignored - source/armed off" << path;
         return;
+    }
     if (m_sessionPath.isEmpty()) {
         qWarning() << "CameraController: hot folder photo ignored - no session folder yet" << path;
         return;
@@ -2312,13 +2524,17 @@ void CameraController::onHotFolderFileReady(const QString &path)
 
     const QFileInfo src(path);
     const QString ext = src.suffix().toLower();
-    // Cấp tên trên main thread (bộ đếm dùng chung với luồng SDK); di chuyển + lật
-    // trên m_hotFolderPool một luồng → ảnh vào phiên đúng thứ tự chụp.
+    // Cấp tên + số thứ tự trên main thread (bộ đếm dùng chung với luồng SDK);
+    // di chuyển + lật song song trên m_hotFolderPool, phát imageCaptured theo
+    // đúng thứ tự chụp trong finishHotFolderImport.
     const QString dest = nextSessionPhotoPath(m_sessionPath, ext, src.fileName());
     const bool mirror = m_mirrorMode;
+    const quint64 seq = m_hotFolderNextSeq++;
     ++m_hotFolderImporting;
 
-    (void)QtConcurrent::run(&m_hotFolderPool, [this, path, dest, mirror]() {
+    (void)QtConcurrent::run(&m_hotFolderPool, [this, path, dest, mirror, seq]() {
+        QElapsedTimer timer;
+        timer.start();
         QDir().mkpath(QFileInfo(dest).absolutePath());
 
         bool moved = QFile::rename(path, dest);
@@ -2329,21 +2545,99 @@ void CameraController::onHotFolderFileReady(const QString &path)
         }
         if (!moved) {
             qWarning() << "CameraController: failed to move hot folder photo" << path << "->" << dest;
-            QMetaObject::invokeMethod(this, [this, path]() {
-                m_hotFolderImporting = qMax(0, m_hotFolderImporting - 1);
-                emit error("Không chuyển được ảnh từ Hot Folder: " + path);
+            QMetaObject::invokeMethod(this, [this, seq, path]() {
+                finishHotFolderImport(seq, QString(), path);
             }, Qt::QueuedConnection);
             return;
         }
+        const qint64 moveMs = timer.elapsed();
 
-        if (mirror)
+        qint64 previewMs = -1;
+        if (mirror) {
+            // Lật ảnh gốc q100 mất 1-3 s → hiện trước bản nhỏ đã lật cho khách xem.
+            const QString preview = writeLivePreview(dest, true);
+            previewMs = timer.elapsed();
+            if (!preview.isEmpty()) {
+                QMetaObject::invokeMethod(this, [this, seq, dest, preview]() {
+                    m_hotFolderPreviewsReady.insert(seq, qMakePair(dest, preview));
+                    flushHotFolderPreviews();
+                }, Qt::QueuedConnection);
+            }
             mirrorJpegInPlace(dest);
+        }
 
-        qDebug() << "CameraController: hot folder photo ->" << dest << "| mirror:" << mirror;
-        QMetaObject::invokeMethod(this, [this, dest]() {
-            m_hotFolderImporting = qMax(0, m_hotFolderImporting - 1);
-            emit imageCaptured(dest);
-            emit statusMessage("✓ Photo saved: " + dest);
+        qWarning() << "CameraController: hot folder photo ->" << dest << "| mirror:" << mirror
+                   << "| moveMs:" << moveMs << "| previewMs:" << previewMs
+                   << "| totalMs:" << timer.elapsed();
+        QMetaObject::invokeMethod(this, [this, seq, dest]() {
+            finishHotFolderImport(seq, dest, QString());
         }, Qt::QueuedConnection);
     });
+}
+
+void CameraController::finishHotFolderImport(quint64 seq, const QString &dest,
+                                             const QString &failedSource)
+{
+    m_hotFolderDone.insert(seq, { dest, failedSource });
+
+    // Ảnh lật xong sớm hơn ảnh chụp trước nó → giữ lại tới lượt.
+    while (m_hotFolderDone.contains(m_hotFolderEmitSeq)) {
+        const HotFolderResult r = m_hotFolderDone.take(m_hotFolderEmitSeq++);
+        m_hotFolderImporting = qMax(0, m_hotFolderImporting - 1);
+        if (r.dest.isEmpty()) {
+            emit error("Không chuyển được ảnh từ Hot Folder: " + r.failedSource);
+            continue;
+        }
+        emit imageCaptured(r.dest);
+        emit statusMessage("✓ Photo saved: " + r.dest);
+    }
+    flushHotFolderPreviews();
+}
+
+void CameraController::flushHotFolderPreviews()
+{
+    while (true) {
+        // Ảnh gốc đã phát imageCaptured (không mirror, lỗi, hoặc lật xong trước khi
+        // bản xem trước tới lượt) → không cần bản xem trước nữa.
+        if (m_hotFolderPreviewSeq < m_hotFolderEmitSeq) {
+            m_hotFolderPreviewsReady.remove(m_hotFolderPreviewSeq++);
+            continue;
+        }
+        auto it = m_hotFolderPreviewsReady.find(m_hotFolderPreviewSeq);
+        if (it == m_hotFolderPreviewsReady.end())
+            break;
+        const QPair<QString, QString> p = it.value();
+        m_hotFolderPreviewsReady.erase(it);
+        ++m_hotFolderPreviewSeq;
+        emit hotFolderPhotoPreview(p.first, p.second);
+    }
+}
+
+QString CameraController::writeLivePreview(const QString &photoPath, bool mirror)
+{
+    constexpr int kLongEdge = 1600;
+    QImageReader reader(photoPath);
+    reader.setAutoTransform(true);
+    // Giải mã thu nhỏ ngay trong libjpeg (DCT 1/2, 1/4…) → nhanh hơn nhiều so
+    // với giải mã full-size. size() là kích thước lưu trong file (trước khi xoay).
+    const QSize stored = reader.size();
+    if (stored.isValid() && qMax(stored.width(), stored.height()) > kLongEdge)
+        reader.setScaledSize(stored.scaled(kLongEdge, kLongEdge, Qt::KeepAspectRatio));
+    QImage img = reader.read();
+    if (img.isNull()) {
+        qWarning() << "CameraController: live preview failed" << photoPath << reader.errorString();
+        return {};
+    }
+    if (mirror)
+        img.flip(Qt::Horizontal);
+
+    const QFileInfo info(photoPath);
+    const QString dir = info.absolutePath() + QStringLiteral("/.display");
+    QDir().mkpath(dir);
+    const QString out = QDir(dir).filePath(info.completeBaseName() + QStringLiteral("_live.jpg"));
+    if (!img.save(out, "JPG", 90)) {
+        qWarning() << "CameraController: live preview save failed" << out;
+        return {};
+    }
+    return out;
 }

@@ -27,8 +27,9 @@ public:
     explicit WebcamLiveView(QObject *parent = nullptr);
     ~WebcamLiveView();
 
-    // Scan các webcam khả dụng (index 0..9), trả về danh sách tên hiển thị
-    QStringList scanDevices();
+    // Scan các webcam khả dụng (index 0..9), trả về index DirectShow của thiết bị
+    // đọc được frame. Không đụng trạng thái object → gọi được từ luồng nền.
+    static QList<int> scanDevices();
 
     // Mở webcam theo index từ scanDevices(), bắt đầu streaming
     bool start(int deviceIndex);
@@ -55,6 +56,9 @@ signals:
     // Phát mỗi khi có frame mới — cùng tên với CameraController::frameReady
     // để LiveViewPanel có thể dùng chung Connections target
     void frameReady();
+    // Luồng capture tự dừng (không mở được thiết bị / đọc frame lỗi). Phát từ
+    // luồng capture → nối bằng QueuedConnection.
+    void streamEnded();
 
 private:
     void captureLoop();

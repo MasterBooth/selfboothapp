@@ -41,8 +41,8 @@ function when(value: string | null) {
     : date.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-/** One linked machine: status, app version, last contact, and an in-place rename. */
-export function DeviceCard({ machine, onRenamed }: { machine: Machine; onRenamed: (machine: Machine) => void }) {
+/** One linked machine: status, app version, last contact, and an in-place rename (if allowed). */
+export function DeviceCard({ canRename = true, machine, onRenamed }: { canRename?: boolean; machine: Machine; onRenamed: (machine: Machine) => void }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -86,7 +86,7 @@ export function DeviceCard({ machine, onRenamed }: { machine: Machine; onRenamed
     <article className="device-card">
       <div className="device-card-head">
         <span className={`status-pill ${state.tone}`}>{state.label}</span>
-        {!editing ? (
+        {!editing && canRename ? (
           <button aria-label={`Đổi tên ${machineName(machine)}`} className="text-action device-rename" onClick={start} type="button">
             <Pencil size={15} />Đổi tên
           </button>

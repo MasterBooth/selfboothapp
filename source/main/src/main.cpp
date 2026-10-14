@@ -320,16 +320,20 @@ int main(int argc, char *argv[]) {
   eventManager.setPrinterManager(&printerManager);
   frameSyncManager.setEventManager(&eventManager);
   frameSyncManager.setMachineAuthenticator(machineAuth);
-  frameSyncManager.start(5000);
   filterSyncManager.setFilterManager(&filterManager);
   filterSyncManager.setMachineAuthenticator(machineAuth);
-  filterSyncManager.start(5000);
   backgroundSyncManager.setEventManager(&eventManager);
   backgroundSyncManager.setMachineAuthenticator(machineAuth);
-  backgroundSyncManager.start(5000);
   paymentSyncManager.setEventManager(&eventManager);
   paymentSyncManager.setMachineAuthenticator(machineAuth);
-  paymentSyncManager.start(5000);
+  // Bốn vòng "đẩy từ web xuống máy" (frame / bộ lọc / ảnh nền / thanh toán) KHÔNG chạy: API chưa có
+  // các route /machine/<hwid>/*-jobs, nên mỗi lần hỏi (10 s × 4 / máy, ~35 000 request/ngày/máy)
+  // chỉ nhận về trang 404 do worker web dựng — tốn request + CPU Cloudflare mà không làm được gì.
+  // Bật lại bằng start(...) khi server có các route này (gọi đúng "/v1/machine/...").
+  // frameSyncManager.start(5000);
+  // filterSyncManager.start(5000);
+  // backgroundSyncManager.start(5000);
+  // paymentSyncManager.start(5000);
   printerManager.setPrinterConfig(&printerConfig);  // Cho phép PrinterManager đọc tên máy in đã chọn
   // Nạp chế độ bleed của tấm in cắt vào ImageCompositor (ImageCompositor toàn static,
   // không đọc DB được). Phải chạy TRƯỚC phiên chụp đầu tiên.

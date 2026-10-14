@@ -112,7 +112,7 @@ bool FujiHotFolderProcess::isRunning()
 bool FujiHotFolderProcess::launch()
 {
     if (isRunning()) {
-        qDebug() << "FujiHotFolderProcess: HotFolder.exe already running";
+        qWarning() << "FujiHotFolderProcess: HotFolder.exe already running";
         return true;
     }
 
@@ -124,7 +124,7 @@ bool FujiHotFolderProcess::launch()
 
     // Working dir = thư mục exe để app Fuji nạp được LIBRARY\XAPI.dll.
     const bool ok = QProcess::startDetached(exe, {}, QFileInfo(exe).absolutePath());
-    qDebug() << "FujiHotFolderProcess: launch" << exe << "ok =" << ok;
+    qWarning() << "FujiHotFolderProcess: launch" << exe << "ok =" << ok;
     return ok;
 }
 
@@ -178,7 +178,7 @@ void FujiHotFolderProcess::poll()
     const bool running = isRunning();
     if (running != m_running) {
         m_running = running;
-        qDebug() << "FujiHotFolderProcess: HotFolder.exe" << (running ? "running" : "stopped");
+        qWarning() << "FujiHotFolderProcess: HotFolder.exe" << (running ? "running" : "stopped");
         emit runningChanged(running);
     }
 
@@ -186,7 +186,7 @@ void FujiHotFolderProcess::poll()
     const QString folder = saveFolder();
     if (folder != m_folder) {
         m_folder = folder;
-        qDebug() << "FujiHotFolderProcess: save folder changed to" << folder;
+        qWarning() << "FujiHotFolderProcess: save folder changed to" << folder;
         emit folderChanged(folder);
     }
 }

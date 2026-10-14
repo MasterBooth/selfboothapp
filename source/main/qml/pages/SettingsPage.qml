@@ -5918,15 +5918,11 @@ Rectangle {
                                 }
 
                                 Button {
-                                    text: "Scan"
+                                    text: cameraController.webcamScanning ? "Đang quét..." : "Scan"
+                                    enabled: !cameraController.webcamScanning
                                     Layout.preferredWidth: 80
                                     Layout.preferredHeight: 44
-                                    onClicked: {
-                                        var list = cameraController.scanWebcams()
-                                        webcamCombo.model = list.length > 0
-                                            ? list
-                                            : ["Không tìm thấy webcam"]
-                                    }
+                                    onClicked: cameraController.scanWebcams()
                                     background: Rectangle {
                                         color: parent.hovered ? "#2a8bff" : "#1e7eea"
                                         radius: 4
@@ -5944,22 +5940,27 @@ Rectangle {
                                     id: webcamCombo
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 44
-                                    model: cameraController.webcamList.length > 0
-                                        ? cameraController.webcamList
-                                        : ["Nhấn Scan để tìm webcam"]
-
-                                    Component.onCompleted: {
-                                        // Khôi phục webcam đã chọn trước
-                                        var saved = cameraController.selectedWebcamIndex
-                                        if (saved >= 0 && saved < model.length)
-                                            currentIndex = saved
+                                    property bool scanned: false
+                                    enabled: !cameraController.webcamScanning
+                                    model: cameraController.webcamScanning ? ["Đang quét..."]
+                                         : cameraController.webcamList.length > 0 ? cameraController.webcamList
+                                         : [scanned ? "Không tìm thấy webcam" : "Nhấn Scan để tìm webcam"]
+                                    // Danh sách chỉ gồm thiết bị đọc được → vị trí ≠ index thiết bị.
+                                    currentIndex: {
+                                        cameraController.webcamList
+                                        return Math.max(0, cameraController.webcamListIndexOf(
+                                                               cameraController.selectedWebcamIndex))
                                     }
 
-                                    onActivated: {
-                                        if (model[currentIndex] !== "Nhấn Scan để tìm webcam"
-                                                && model[currentIndex] !== "Không tìm thấy webcam") {
-                                            cameraController.startWebcamLiveView(currentIndex)
-                                        }
+                                    Connections {
+                                        target: cameraController
+                                        function onWebcamScanFinished(count) { webcamCombo.scanned = true }
+                                    }
+
+                                    onActivated: function(index) {
+                                        var device = cameraController.webcamDeviceAt(index)
+                                        if (device >= 0)
+                                            cameraController.startWebcamLiveView(device)
                                     }
 
                                     background: Rectangle {

@@ -207,8 +207,9 @@ export async function handleLogin(req: Request, env: Env): Promise<Response> {
 
   const user = await env.DB.prepare(
     `SELECT u.id, u.studio_id, u.password_hash, u.role, u.status, s.name AS studio_name, s.status AS studio_status
-       FROM studio_users u JOIN studios s ON s.id = u.studio_id WHERE u.email = ?`)
+       FROM studio_users u JOIN studios s ON s.id = u.studio_id WHERE u.email = ? AND u.role = 'owner'`)
     .bind(email).first<Record<string, string>>();
+  // Owners only: a staff account (web portal /staff) never links a booth machine.
 
   const ok = user ? await verifyPassword(password, user.password_hash) : (await burnPasswordCheck(password), false);
   if (!ok || !user) {

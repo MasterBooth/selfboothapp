@@ -7,12 +7,14 @@ export interface Env {
   ADMIN_API_TOKEN: string;       // route /v1/admin/*
   UPLOAD_SIGNING_SECRET: string; // ký upload_url
   LICENSE_PUBLIC_KEYS: string;   // "kid:hex,kid2:hex" — khoá công khai xác minh giấy phép (license.ts)
+  TURNSTILE_SITE_KEY?: string;   // [vars] — khoá công khai widget Turnstile (turnstile.ts)
+  TURNSTILE_SECRET_KEY?: string; // secret — chưa đặt thì bỏ qua bước xác minh người thật
 }
 
 export const corsHeaders: Record<string, string> = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
-  "access-control-allow-headers": "authorization, content-type, range",
+  "access-control-allow-headers": "authorization, content-type, range, x-sb-portal",
   "access-control-expose-headers": "content-length, content-range, accept-ranges, etag",
 };
 

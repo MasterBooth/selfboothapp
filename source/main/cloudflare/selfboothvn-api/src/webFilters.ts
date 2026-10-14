@@ -7,7 +7,8 @@
 //   DELETE /v1/web/filters/:id
 
 import { Env, HttpError, isSafeId, json, newId, nowIso, readJson, str } from "./http";
-import { requireWebSession } from "./webAuth";
+import { requirePermission } from "./webAuth";
+import { READ_FILTERS } from "./permissions";
 import { signedMediaUrl } from "./upload";
 
 const FILTER_STORAGE_ROOT = "filters";
@@ -99,7 +100,7 @@ export async function listStudioFilters(env: Env, origin: string, studioId: stri
 }
 
 export async function handleWebFilters(req: Request, env: Env, url: URL): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, ...(req.method === "GET" ? READ_FILTERS : ["filters.upload"]));
   if (req.method === "GET") {
     const filters = await listStudioFilters(env, url.origin, caller.studioId);
     return json({ success: true, filters }, 200, { "cache-control": "no-store" });
@@ -139,7 +140,7 @@ export async function handleWebFilters(req: Request, env: Env, url: URL): Promis
 }
 
 export async function handleWebFilterDetail(req: Request, env: Env, url: URL, filterId: string): Promise<Response> {
-  const caller = await requireWebSession(req, env);
+  const caller = await requirePermission(req, env, req.method === "DELETE" ? "filters.delete" : "filters.edit");
   if (!isSafeId(filterId, 8, 64)) throw new HttpError(400, "invalid_filter_id");
   const current = await loadFilter(env, caller.studioId, filterId);
   if (!current) throw new HttpError(404, "filter_not_found");

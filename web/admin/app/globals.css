@@ -204,6 +204,27 @@ select {
   font-size: var(--text-sm);
 }
 
+/* Turnstile (sign-in): invisible unless Cloudflare asks for a tick; then it takes the form's width. */
+.turnstile-slot {
+  display: grid;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+.turnstile-slot:has(> div:empty) {
+  display: none;
+}
+
+.turnstile-slot:has(.turnstile-error) {
+  display: grid;
+}
+
+.turnstile-error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+
 .primary-action,
 .ghost-action,
 .account-pill button,
@@ -502,7 +523,10 @@ select {
 
 .library-toolbar {
   display: grid;
-  grid-template-columns: minmax(12rem, 1fr) auto;
+  grid-template-columns:
+    minmax(11rem, 1.4fr) minmax(9rem, 1fr) minmax(9rem, 1fr) minmax(5.5rem, 0.6fr)
+    minmax(10rem, 1fr) auto;
+  align-items: end;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
   border: 1px solid var(--color-rule);
@@ -511,7 +535,9 @@ select {
   padding: var(--space-sm);
 }
 
-.library-toolbar select {
+.library-toolbar select,
+.library-toolbar input {
+  width: 100%;
   min-height: var(--control-md);
   min-width: 0;
   border: 1px solid var(--color-rule);
@@ -519,6 +545,62 @@ select {
   background: var(--color-surface);
   color: var(--color-ink);
   padding: 0 var(--space-md);
+}
+
+.library-filter {
+  display: grid;
+  gap: var(--space-3xs);
+  min-width: 0;
+}
+
+.library-filter > span {
+  color: var(--color-neutral);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.library-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+/* Thư viện ảnh: bảng kẻ ô như bảng tính — mỗi ô có viền, tiêu đề nền riêng, số căn giữa. */
+.library-table .cell-no,
+.library-table .cell-count {
+  width: 5.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+@media (min-width: 821px) {
+  .library-table table {
+    border-style: hidden; /* viền ngoài do khung .table-shell vẽ */
+  }
+
+  .library-table th,
+  .library-table td {
+    border: 1px solid var(--color-rule);
+    vertical-align: middle;
+  }
+
+  .library-table thead th {
+    background: var(--color-paper-2);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .library-table tbody tr:nth-child(even) td {
+    background: var(--color-paper);
+  }
+
+  .library-table td.cell-thumb {
+    width: 6rem;
+  }
 }
 
 .studio-grid {
@@ -1697,6 +1779,27 @@ tr:last-child td {
   color: var(--color-muted);
   font-size: var(--text-sm);
   font-weight: 800;
+}
+
+.progress-actions {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+}
+
+.progress-actions .primary-action {
+  width: 100%;
+}
+
+.progress-panel .progress-actions svg {
+  color: inherit;
+  animation: none;
+}
+
+.progress-panel .progress-actions .text-action {
+  color: var(--color-accent);
+  font-size: 1rem;
 }
 
 .progress-panel progress {
@@ -4137,8 +4240,36 @@ a.gallery-icon-button {
   }
 
   .library-table td.cell-thumb {
+    grid-column: 1;
     grid-row: 1 / span 4;
     align-items: start;
+  }
+
+  /* Bộ lọc trên điện thoại: 2 cột (ngày | ngày, STT | …), máy / số dòng / nút chiếm cả hàng. */
+  .library-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .library-filter-machine,
+  .library-filter-limit,
+  .library-filter-actions {
+    grid-column: 1 / -1;
+  }
+
+  .library-toolbar input {
+    min-height: 3rem;
+    font-size: 16px;
+  }
+
+  /* STT, thời gian, máy, số ảnh xếp ở cột phải cạnh ảnh preview. */
+  .library-table td:not(.cell-thumb):not(.cell-action) {
+    grid-column: 2;
+  }
+
+  .library-table td.cell-no,
+  .library-table td.cell-count {
+    width: auto;
+    text-align: right;
   }
 
   .library-table td.cell-title {
@@ -6439,6 +6570,773 @@ body {
   margin-bottom: var(--space-md);
 }
 
+/* Hallmark · component: room covers + room-first booking (admin "Phòng chụp" · /booking)
+ * genre: editorial · theme: Studio · design-system: design.md · macrostructure: Workbench (locked)
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ * Booking keeps the workbench voice: rooms are list rows (cover · name · from-price), not
+ * marketing cards; the room page is one column — cover, facts, package rows, then day/time/note.
+ */
+
+/* ── Admin · Phòng chụp: one card per room, cover on top, edit in place ── */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-md);
+}
+
+.room-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.room-cover {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  margin: 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-rule);
+  background: var(--color-paper-2);
+}
+
+.room-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.room-cover-empty,
+.room-cover-busy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-2xs);
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.room-cover-busy {
+  background: color-mix(in oklch, var(--color-surface) 78%, transparent);
+  color: var(--color-accent);
+}
+
+.room-body {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2xs);
+  min-width: 0;
+  padding: var(--space-md);
+}
+
+.room-body h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-style: normal;
+  line-height: var(--leading-tight);
+}
+
+.room-capacity {
+  color: var(--color-neutral);
+  font-weight: 700;
+}
+
+.room-description {
+  display: -webkit-box;
+  margin: var(--space-2xs) 0 0;
+  overflow: hidden;
+  color: var(--color-muted);
+  line-height: var(--leading-body);
+  white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.room-price {
+  margin: var(--space-2xs) 0 0;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+}
+
+.room-price strong {
+  color: var(--color-price);
+}
+
+.room-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  border-top: 1px solid var(--color-rule);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.room-actions > * {
+  white-space: nowrap;
+}
+
+.room-actions .danger-action {
+  margin-left: auto;
+}
+
+/* The cover picker is a label: the native file input stays reachable but invisible. */
+.room-actions label.ghost-action {
+  position: relative;
+  cursor: pointer;
+}
+
+.room-actions label.ghost-action input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.room-actions label.ghost-action:focus-within {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.room-actions label.ghost-action.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.room-actions label.ghost-action.is-disabled input {
+  cursor: not-allowed;
+}
+
+.room-edit {
+  display: grid;
+  align-content: start;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.room-edit label {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.room-edit label > span {
+  color: var(--color-neutral);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.room-edit input,
+.room-edit textarea {
+  min-height: var(--control-md);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  outline: var(--rule-focus) solid transparent;
+  outline-offset: 1px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font: inherit;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.room-edit textarea {
+  min-height: 6rem;
+  resize: vertical;
+  line-height: var(--leading-body);
+}
+
+.room-edit input:focus-visible,
+.room-edit textarea:focus-visible {
+  border-color: var(--color-rule-strong);
+  outline-color: var(--color-focus);
+}
+
+.room-edit input:invalid:not(:placeholder-shown) {
+  border-color: var(--color-error);
+}
+
+.room-edit-count {
+  justify-self: end;
+  color: var(--color-neutral);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.room-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .room-edit input:hover,
+  .room-edit textarea:hover {
+    background: var(--color-paper-2);
+  }
+}
+
+/* ── /booking · room list → room page ── */
+.booking-page button:focus-visible,
+.booking-page a:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.room-list {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.room-row {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 5.5rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: var(--space-xs);
+  text-align: left;
+  transition: border-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+.room-row:active {
+  transform: translateY(1px);
+}
+
+.room-row-cover {
+  display: grid;
+  place-items: center;
+  /* Same 3:2 as the room page and the admin's framing editor: what they frame is what guests see. */
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: calc(var(--radius-sm) - 0.25rem);
+  background: var(--color-paper-2);
+  color: var(--color-neutral);
+}
+
+.room-row-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.room-row-text {
+  display: grid;
+  gap: var(--space-3xs);
+  min-width: 0;
+}
+
+.room-row-text strong {
+  overflow-wrap: anywhere;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-style: normal;
+  line-height: var(--leading-tight);
+}
+
+.room-row-text small {
+  color: var(--color-neutral);
+  font-weight: 700;
+}
+
+.room-row-price {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.room-row-price b {
+  color: var(--color-price);
+}
+
+.room-row-go {
+  color: var(--color-accent);
+}
+
+.room-detail {
+  display: grid;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.room-back {
+  justify-self: start;
+}
+
+.room-hero {
+  aspect-ratio: 3 / 2;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper-2);
+}
+
+.room-hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.room-detail h2 {
+  margin: var(--space-xs) 0 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-style: normal;
+  line-height: var(--leading-tight);
+}
+
+.room-detail-capacity {
+  margin: 0;
+  color: var(--color-neutral);
+  font-weight: 700;
+}
+
+.room-detail-description {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: var(--leading-body);
+  white-space: pre-line;
+}
+
+.package-list {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.package-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  min-height: 3.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  padding: var(--space-sm);
+  text-align: left;
+}
+
+.package-row:active {
+  transform: translateY(1px);
+}
+
+.package-row-mark {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-rule-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.package-row-text {
+  display: grid;
+  gap: var(--space-3xs);
+  min-width: 0;
+}
+
+.package-row-text strong {
+  overflow-wrap: anywhere;
+}
+
+.package-row-text small {
+  color: var(--color-neutral);
+  line-height: var(--leading-snug);
+}
+
+.package-row-price {
+  color: var(--color-price);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.package-row.active {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+}
+
+.package-row.active .package-row-mark {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 3px var(--color-surface);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .room-row:hover,
+  .package-row:hover {
+    border-color: var(--color-rule-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-row,
+  .room-row:active,
+  .package-row:active {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Guest not signed in: one quiet line + "Đăng nhập" (the form opens in the sheet below). */
+.booking-account-hint {
+  margin: 0;
+  min-width: 0;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+/* Sign-in sheet: native <dialog>, pinned to the centre; opens when a guest books. */
+.booking-auth-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(100% - 2 * var(--space-md), 26rem);
+  height: fit-content;
+  max-height: min(90dvh, 40rem);
+  margin: auto;
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  padding: 0;
+}
+
+.booking-auth-dialog::backdrop {
+  background: color-mix(in oklch, var(--color-ink) 45%, transparent);
+}
+
+.booking-auth-dialog .booking-auth {
+  margin: 0;
+}
+
+.booking-auth-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.booking-auth-head h2 {
+  margin: 0;
+  min-width: 0;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-style: normal;
+}
+
+.booking-icon-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+@media (min-width: 40rem) {
+  .room-row {
+    grid-template-columns: 9rem minmax(0, 1fr) auto;
+    min-height: 7rem;
+  }
+
+  .room-row-text strong {
+    font-size: var(--text-xl);
+  }
+}
+
+/* ── Admin · căn khung ảnh bìa: <dialog> — khung 3:2 + thanh zoom | xem trước trang đặt lịch ── */
+.room-grid-head {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 var(--space-sm);
+}
+
+.cover-editor {
+  position: fixed;
+  inset: 0;
+  width: min(100% - 2 * var(--space-sm), 64rem);
+  height: fit-content;
+  max-height: calc(100dvh - 2 * var(--space-sm));
+  margin: auto;
+  overflow: auto;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  padding: 0;
+}
+
+.cover-editor::backdrop {
+  background: color-mix(in oklch, var(--color-ink) 50%, transparent);
+}
+
+.cover-editor-head,
+.cover-editor-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.cover-editor-head {
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.cover-editor-head h2 {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-style: normal;
+  line-height: var(--leading-tight);
+}
+
+.cover-editor-head p {
+  margin: var(--space-2xs) 0 0;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+}
+
+.cover-editor-foot {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  border-top: 1px solid var(--color-rule);
+}
+
+.cover-editor-error {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.cover-editor-body {
+  display: grid;
+  gap: var(--space-lg);
+  padding: var(--space-md);
+}
+
+.cover-editor-work {
+  display: grid;
+  align-content: start;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+/* The frame: drag anywhere inside; the photo moves under a fixed 3:2 window. */
+.cover-stage {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-sm);
+  outline: var(--rule-focus) solid transparent;
+  outline-offset: 2px;
+  background: var(--color-paper-3);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.cover-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.cover-stage:focus-visible {
+  outline-color: var(--color-focus);
+}
+
+.cover-stage img {
+  pointer-events: none;
+}
+
+.cover-stage-source {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* Thirds, shown only while dragging, to help place faces / props. */
+.cover-stage-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    linear-gradient(to right, transparent calc(100% / 3 - 0.5px), color-mix(in oklch, var(--color-surface) 70%, transparent) calc(100% / 3 - 0.5px) calc(100% / 3 + 0.5px), transparent calc(100% / 3 + 0.5px) calc(200% / 3 - 0.5px), color-mix(in oklch, var(--color-surface) 70%, transparent) calc(200% / 3 - 0.5px) calc(200% / 3 + 0.5px), transparent calc(200% / 3 + 0.5px)),
+    linear-gradient(to bottom, transparent calc(100% / 3 - 0.5px), color-mix(in oklch, var(--color-surface) 70%, transparent) calc(100% / 3 - 0.5px) calc(100% / 3 + 0.5px), transparent calc(100% / 3 + 0.5px) calc(200% / 3 - 0.5px), color-mix(in oklch, var(--color-surface) 70%, transparent) calc(200% / 3 - 0.5px) calc(200% / 3 + 0.5px), transparent calc(200% / 3 + 0.5px));
+  pointer-events: none;
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+
+.cover-stage.is-dragging .cover-stage-grid {
+  opacity: 1;
+}
+
+.cover-stage-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-xs);
+  color: var(--color-neutral);
+  font-weight: 700;
+  padding: var(--space-md);
+  text-align: center;
+}
+
+.cover-stage-state.is-error {
+  color: var(--color-error);
+}
+
+.cover-zoom {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.cover-zoom input[type="range"] {
+  width: 100%;
+  min-height: 2.75rem;
+  accent-color: var(--color-accent);
+}
+
+.cover-zoom-value {
+  min-width: 3.5rem;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+}
+
+.cover-zoom .text-action {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.cover-icon-button {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.cover-icon-button:focus-visible,
+.cover-editor .text-action:focus-visible,
+.cover-editor .primary-action:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.cover-icon-button:active {
+  transform: translateY(1px);
+}
+
+.cover-icon-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Preview: the booking page's own room row + room header, at phone width. */
+.cover-preview {
+  display: grid;
+  align-content: start;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.cover-preview h3 {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+.cover-preview-surface {
+  display: grid;
+  gap: var(--space-2xs);
+  width: min(100%, 24rem);
+  margin: 0;
+  border: 1px dashed var(--color-rule-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-paper-2);
+  padding: var(--space-sm);
+}
+
+.cover-preview-surface figcaption {
+  color: var(--color-neutral);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.cover-preview-row {
+  cursor: default;
+}
+
+.cover-framed {
+  position: relative;
+  overflow: hidden;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cover-icon-button:hover:not(:disabled) {
+    border-color: var(--color-rule-strong);
+    background: var(--color-paper-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-stage-grid {
+    transition: none;
+  }
+
+  .cover-icon-button:active {
+    transform: none;
+  }
+}
+
+@media (min-width: 52rem) {
+  .cover-editor-body {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 820px) {
   .brand-workbench,
   .booking-settings {
@@ -7318,5 +8216,607 @@ body {
 
   .session-qr-button span {
     display: none;
+  }
+}
+
+/* Hallmark · genre: editorial · macrostructure: Workbench · design-system: design.md · designed-as-app
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ * Admin shell redesign: rail grouped by job (Vận hành · Thiết lập · Studio), chrome flat on the
+ * paper, one surface per section, outline secondary buttons. Staff portal sign-in, staff
+ * accounts and the permission sheet (F3 tabular spec sheet, grouped). */
+
+/* ── Shell (desktop): the section panel is the only surface; rail + topbar sit on the paper. ── */
+@media (min-width: 821px) {
+  .admin-shell {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: var(--space-lg);
+  }
+
+  /* Forms shrink with the workspace instead of pushing it past the screen edge. */
+  .codes-form {
+    grid-template-columns: minmax(10rem, 1.5fr) repeat(4, minmax(0, 1fr)) auto;
+  }
+
+  .packages-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) repeat(2, minmax(0, 0.7fr)) minmax(0, 1fr) auto;
+  }
+
+  .filter-upload-form {
+    grid-template-columns: minmax(0, 0.8fr) repeat(2, minmax(0, 1fr)) auto;
+  }
+
+  .rail {
+    align-content: start;
+    gap: var(--space-lg);
+    border: 0;
+    border-right: 1px solid var(--color-rule);
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    padding: var(--space-xs) var(--space-md) var(--space-xs) 0;
+  }
+
+  .rail-nav {
+    gap: var(--space-lg);
+  }
+
+  .rail-group {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .rail-group-label {
+    color: var(--color-neutral);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    padding: 0 var(--space-sm) var(--space-2xs);
+  }
+
+  .rail-item {
+    position: relative;
+    min-height: 2.75rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted);
+    font-weight: 700;
+    padding: 0 var(--space-sm);
+    transition:
+      background var(--dur-micro) var(--ease-out),
+      color var(--dur-micro) var(--ease-out);
+  }
+
+  .rail-item:hover {
+    background: var(--color-paper-2);
+    color: var(--color-ink);
+  }
+
+  .rail-item:active {
+    background: var(--color-paper-3);
+  }
+
+  .rail-item.active {
+    border: 0;
+    background: color-mix(in oklch, var(--color-accent) 9%, transparent);
+    color: var(--color-accent);
+    font-weight: 800;
+  }
+
+  .rail-item.active::before {
+    position: absolute;
+    top: 0.625rem;
+    bottom: 0.625rem;
+    left: 0;
+    width: 3px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    content: "";
+  }
+
+  .topbar {
+    min-height: 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-rule);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: var(--space-xs) 0 var(--space-md);
+  }
+
+  .topbar-studio {
+    display: block;
+    color: var(--color-neutral);
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  .topbar h1 {
+    margin: var(--space-3xs) 0 0;
+    color: var(--color-ink);
+    font-size: var(--text-xl);
+  }
+
+  .device-panel {
+    min-height: 0;
+  }
+}
+
+/* The workspace stacks from the top; it never stretches its rows to the rail's height. */
+.workspace {
+  align-content: start;
+}
+
+.workspace > * {
+  min-width: 0;
+}
+
+/* Refresh lives with the account, not in a stat strip. */
+.topbar-refresh {
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-left: auto;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out);
+}
+
+.topbar-refresh:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.topbar-refresh:active:not(:disabled) {
+  background: var(--color-paper-2);
+}
+
+.topbar-refresh:disabled {
+  cursor: progress;
+}
+
+/* The topbar names the section; the panel keeps its heading for screen readers and shows its count. */
+.panel-heading {
+  align-items: baseline;
+  justify-content: start;
+}
+
+.panel-heading h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.panel-heading p {
+  font-size: var(--text-sm);
+}
+
+.workspace > .inline-message:empty {
+  display: none;
+}
+
+/* Secondary actions are outlined: one filled CTA per view (design.md · CTA voice). */
+.admin-shell .ghost-action {
+  border-color: var(--color-rule-strong);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.admin-shell .ghost-action:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.admin-shell .ghost-action:active:not(:disabled) {
+  background: var(--color-paper-2);
+  transform: translateY(0);
+}
+
+.admin-shell .ghost-action.is-done {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+/* ── Sign-in: staff portal wears the studio's mark; a quiet switch to the other door. ── */
+.login-brand .brand-mark {
+  margin-bottom: var(--space-lg);
+  font-size: var(--text-lg);
+}
+
+.login-missing {
+  display: flex;
+  align-self: center;
+  align-items: start;
+  gap: var(--space-sm);
+  margin: clamp(1.5rem, 4vw, 3rem);
+  border: 1px dashed var(--color-rule-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  padding: var(--space-md);
+}
+
+.login-missing svg {
+  flex: 0 0 auto;
+  color: var(--color-accent);
+}
+
+.login-missing p {
+  margin: 0;
+  line-height: var(--leading-body);
+}
+
+.login-switch {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--color-rule);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  padding: var(--space-sm) clamp(1.5rem, 4vw, 3rem);
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule-strong);
+  text-underline-offset: 0.25em;
+  white-space: nowrap;
+}
+
+.login-switch:hover {
+  color: var(--color-accent);
+  text-decoration-color: currentColor;
+}
+
+.login-switch:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: -2px;
+}
+
+/* ── Staff accounts (owner only) ── */
+.staff-admin {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.staff-portal {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm) var(--space-md);
+  border: 1px dashed var(--color-rule-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-paper-2);
+  padding: var(--space-md);
+}
+
+.staff-portal > div:first-child {
+  min-width: 0;
+}
+
+.staff-portal h3 {
+  margin: 0;
+  font-size: var(--text-md);
+}
+
+.staff-portal-link {
+  margin: var(--space-3xs) 0 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.staff-portal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.staff-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.staff-toolbar p {
+  margin: 0;
+  color: var(--color-neutral);
+  font-weight: 700;
+}
+
+.staff-notice {
+  margin: 0;
+  color: var(--color-success);
+  font-size: var(--text-sm);
+}
+
+.staff-list {
+  margin: 0;
+  border-top: 1px solid var(--color-rule);
+  padding: 0;
+  list-style: none;
+}
+
+.staff-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) auto minmax(0, 2fr) auto auto;
+  align-items: center;
+  gap: var(--space-xs) var(--space-md);
+  border-bottom: 1px solid var(--color-rule);
+  padding: var(--space-sm) 0;
+}
+
+.staff-row.is-disabled .staff-who,
+.staff-row.is-disabled .staff-scope {
+  opacity: 0.6;
+}
+
+.staff-who {
+  display: grid;
+  min-width: 0;
+}
+
+.staff-who strong,
+.staff-who span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.staff-who span {
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+}
+
+.staff-scope {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+}
+
+.staff-last {
+  color: var(--color-neutral);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.staff-actions {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: var(--space-2xs);
+}
+
+.staff-actions .text-action {
+  white-space: nowrap;
+}
+
+.staff-actions .danger-action {
+  justify-content: center;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+}
+
+/* Dialogs: staff editor, password reset, own password. */
+.staff-dialog,
+.password-dialog {
+  max-height: calc(100svh - var(--space-md) * 2);
+  overflow-y: auto;
+}
+
+.staff-dialog {
+  width: min(48rem, 100%);
+}
+
+.password-dialog {
+  width: min(26rem, 100%);
+}
+
+.gallery-modal-panel.staff-dialog > .staff-dialog-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-sm);
+}
+
+.staff-dialog label,
+.password-dialog > label {
+  display: grid;
+  gap: var(--space-2xs);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.staff-dialog-fields input,
+.password-dialog input {
+  width: 100%;
+  min-height: var(--control-md);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: 16px;
+  outline: none;
+  padding: 0 var(--space-md);
+}
+
+.password-dialog .password-field input {
+  padding-right: 3.25rem;
+}
+
+.staff-dialog-fields input:focus,
+.password-dialog input:focus {
+  border-color: var(--color-focus);
+}
+
+.staff-dialog input:focus-visible,
+.password-dialog input:focus-visible,
+.staff-dialog button:focus-visible,
+.password-dialog button:focus-visible,
+.staff-admin button:focus-visible {
+  outline: var(--rule-focus) solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.staff-dialog-fields input:invalid:not(:placeholder-shown) {
+  border-color: var(--color-error);
+}
+
+.staff-presets > span {
+  margin-right: var(--space-2xs);
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.chip-action {
+  min-height: 2.5rem;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  padding: 0 var(--space-sm);
+  white-space: nowrap;
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out);
+}
+
+.chip-action:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.chip-action:active {
+  background: var(--color-paper-2);
+}
+
+/* The permission sheet: one ruled column per group, one row per action. */
+.gallery-modal-panel.staff-dialog > .permission-sheet {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  align-items: start;
+  gap: var(--space-sm);
+}
+
+.permission-group {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: var(--space-2xs) var(--space-sm) var(--space-3xs);
+}
+
+.permission-group legend {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  width: 100%;
+  color: var(--color-ink);
+  font-weight: 800;
+  padding: 0 var(--space-3xs);
+}
+
+.permission-group legend small {
+  color: var(--color-neutral);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.staff-dialog .permission-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: 2.75rem;
+  border-top: 1px solid color-mix(in oklch, var(--color-rule) 60%, transparent);
+  color: var(--color-muted);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.staff-dialog .permission-item:first-of-type {
+  border-top: 0;
+}
+
+.permission-item input {
+  flex: 0 0 auto;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+}
+
+.staff-dialog .permission-item.is-on {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.staff-dialog .permission-item:hover {
+  color: var(--color-accent);
+}
+
+.staff-count {
+  margin-right: auto;
+  color: var(--color-neutral);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.frame-name {
+  display: block;
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 820px) {
+  /* Phone tab bar: groups dissolve into one scrollable row. */
+  .rail-group {
+    display: contents;
+  }
+
+  .rail-group-label {
+    display: none;
+  }
+
+  .staff-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .staff-scope,
+  .staff-last,
+  .staff-actions {
+    grid-column: 1 / -1;
+  }
+
+  .staff-actions {
+    flex-wrap: wrap;
+    justify-content: start;
+  }
+
+  .login-switch {
+    padding: var(--space-sm) var(--space-md);
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail-item,
+  .topbar-refresh,
+  .chip-action {
+    transition: opacity 150ms linear;
   }
 }

@@ -87,7 +87,8 @@ to it. Amend intentionally - the file is the rule.
     gửi ảnh: 4s → giãn dần tới 20s, dừng khi tab ẩn, dừng hẳn sau 6 lần không có ảnh mới / 10 phút;
     ảnh đã hiện giữ nguyên đối tượng (không đổi `src`).
 - Ảnh đã ghép · nút thứ 3 cạnh "Tải ảnh lên / Tải tất cả" → `/gallery/composed`: ảnh ghép của máy chụp
-  (`kind = collage`) + ảnh in khách tạo ở bước chỉnh sửa (lưu trong trình duyệt, IndexedDB, 7 ngày).
+  (`kind = collage`) + ảnh in khách tạo ở bước chỉnh sửa (lưu lên server theo phiên, `web-…`; bản tạm trong
+  trình duyệt chỉ để gửi lại khi mạng lỗi). Admin thấy cùng danh sách (nút "Ảnh đã ghép" ở Thư viện ảnh).
   Ảnh đã ghép LÀ đúng file ảnh in (PNG full-size), không phải bản nén — tải về in lại vẫn nét.
 - Thương hiệu (admin → "Thương hiệu") · tên, logo (PNG/JPG/WebP ≤ 2MB, không SVG), 3 màu: nền, chữ, nút.
   `app/brand.tsx` ghi đè token của hệ thống ở `:root`; các sắc trung gian (thẻ, viền, chữ phụ) trộn từ 3 màu
@@ -96,10 +97,17 @@ to it. Amend intentionally - the file is the rule.
   (cảnh báo < 4.5:1) và xem trước điện thoại trước khi lưu. Mọi màu mới trong CSS PHẢI dùng token
   (không oklch cứng) để theo được thương hiệu.
   Logo + tên hiện ở: thanh bên admin, đầu trang gallery, đầu trang đặt lịch. Màu áp cho admin + mọi trang khách.
-- Đặt lịch · khách: `/booking?studio_id=…`. Chưa đăng nhập → một thẻ 2 tab "Đăng nhập" (chỉ SĐT) /
-  "Đăng ký" (họ tên + SĐT); phiên 24h. Đã đăng nhập → dòng tên + SĐT che ("09•• ••• 678") + "Thoát",
-  rồi 3 tab: Đặt lịch (phòng → gói → ngày → giờ trống → ghi chú BẮT BUỘC; không hỏi lại tên/SĐT) ·
-  Lịch của tôi · Ảnh của tôi.
+- Đặt lịch · khách: `/booking?studio_id=…`. Ai cũng xem được phòng + gói, KHÔNG bắt đăng nhập trước.
+  Trang đầu "Chọn phòng" = danh sách hàng `.room-row` (ảnh bìa 4:3 · tên phòng chữ display · sức chứa ·
+  "Từ <giá thấp nhất> · n gói" tự tính từ gói) — hàng của bàn làm việc, không phải thẻ quảng cáo.
+  Chạm phòng → trang phòng (`?room=<id>`, nút Back trình duyệt về danh sách; link "Tất cả phòng"):
+  ảnh bìa 3:2 · tên · sức chứa · mô tả (giữ xuống dòng) · gói dạng hàng chọn một (`.package-row`, chấm tròn,
+  giá bên phải, rẻ nhất trước). Chọn gói xong mới hiện Ngày → Giờ trống → Ghi chú BẮT BUỘC ngay bên dưới;
+  `.flow-bar` dính đáy (giá · gói · ngày · giờ + "Đặt lịch").
+  Chưa đăng nhập: dòng gợi ý nhỏ + "Đăng nhập"; bấm "Đặt lịch" → hộp `<dialog>` giữa màn 2 tab "Đăng nhập"
+  (chỉ SĐT) / "Đăng ký" (họ tên + SĐT), nút "Đăng nhập & đặt lịch" — xong là gửi lịch luôn, không bấm lại.
+  Phiên 24h. Đã đăng nhập → dòng tên + SĐT che ("09•• ••• 678") + "Thoát", rồi 3 tab: Đặt lịch ·
+  Lịch của tôi · Ảnh của tôi (không hỏi lại tên/SĐT).
   Lịch của tôi: lịch sắp tới lên đầu; lịch đã xác nhận hiện thẻ `.play-code` — mã chụp 4 số cỡ lớn (Mono),
   viền nét đứt, "dùng trong ngày dd/mm"; mã đã dùng gạch ngang. Còn lịch chờ → đọc lại mỗi 15s khi tab mở.
   Ảnh của tôi: lưới ảnh bìa buổi chụp (ngày · số ảnh · phòng) → `/gallery?t=…`.
@@ -110,6 +118,17 @@ to it. Amend intentionally - the file is the rule.
 - Khóa gallery 24h · phiên chụp bằng mã đặt lịch, quá 24h: gallery thay lưới ảnh bằng thẻ `.gallery-lock`
   (tiêu đề + gợi ý SĐT che + ô SĐT + "Xem ảnh"); ẩn hàng nút và `.flow-bar`. Thương hiệu vẫn hiện.
   Khách vãng lai (không đặt lịch) không bị khóa.
+- Phòng chụp (admin) · lưới `.room-card`: ảnh bìa 3:2 trên cùng (chưa có → khối giấy + "Chưa có ảnh bìa"),
+  tên (display) · sức chứa · mô tả 3 dòng · "Từ <giá> · n gói"; chân thẻ: Sửa · Thêm/Đổi ảnh · Gỡ ảnh · Xóa.
+  "Sửa" mở form ngay trong thẻ (tên · sức chứa · mô tả ≤1000 ký tự, đếm ký tự) — Lưu / Hủy, không hộp thoại.
+  Mỗi phòng MỘT ảnh bìa, tỉ lệ 3:2 ở MỌI chỗ (thẻ admin, hàng danh sách phòng, trang phòng). Chọn ảnh → hộp
+  `<dialog>` "căn khung" (`CoverEditor.tsx`): khung 3:2 cố định, kéo để dời ảnh, thanh zoom 100–400% (+/−,
+  cuộn chuột, chụm 2 ngón, phím mũi tên / + −), "Vừa khung"; lưới chia ba chỉ hiện khi đang kéo. Bên cạnh
+  (dưới, trên điện thoại) là "Xem trước trang đặt lịch": hàng phòng + đầu trang phòng dựng bằng chính class của
+  `/booking`, cập nhật theo từng thao tác — không vẽ khung điện thoại giả. Lưu: file gốc giữ nguyên, bản khách
+  tải là vùng đã căn (≤1600px, WebP), khung lưu lại (`cover_crop`) → "Căn khung" mở lại đúng chỗ, không cần
+  chọn lại ảnh. Đang lưu → lớp phủ "Đang lưu" trên ảnh. Quyền "Sửa thông tin & ảnh bìa" (`rooms.edit`).
+  Đầu mục có link "Xem trang đặt lịch" (tab mới).
 - Thiết bị (admin) · mỗi máy một thẻ: trạng thái (Online / Tạm vắng / Offline) + "Đổi tên" (sửa tại chỗ,
   Enter lưu, Esc hủy); tên lớn = tên studio đặt (`display_name`), không có thì tên cấu hình máy,
   không có nữa thì "Máy chưa đặt tên". KHÔNG bao giờ hiện mã máy (hwid) ở web.
@@ -128,6 +147,24 @@ to it. Amend intentionally - the file is the rule.
   Khách thấy đúng nhóm admin lưu, đánh số giống admin; mỗi nhóm hiện cả thẻ trang trí của nó.
   Frame cũ chưa có `group` → khách dùng gợi ý theo hình học. Nhóm giống hệt nhau = `copies`:
   ô trống ở nhóm sau lấy ảnh cùng vị trí của nhóm 1.
+- Khung admin (`app/admin/Console.tsx`, dùng chung cho `/` và `/staff`) · rail không đóng hộp, nằm trên nền giấy
+  với vạch phải; mục nhóm theo việc: **Vận hành** (Đặt lịch · Mã chụp · Thư viện ảnh) · **Thiết lập** (Phòng ·
+  Gói · Frame · Bộ lọc · Thiết bị) · **Studio** (Doanh thu · Thương hiệu · Nhân viên). Mục đang mở: nền accent 9%
+  + vạch accent 3px bên trái. Điện thoại: nhóm tan thành một hàng tab cuộn ngang ở đáy.
+  Topbar không hộp: tên studio nhỏ trên tiêu đề cỡ `--text-xl` (màn làm việc không hét); bên phải: Làm mới ·
+  thẻ tài khoản (tên hiển thị + vai trò) · Đổi mật khẩu · Đăng xuất. KHÔNG có dải số liệu chung.
+  Mỗi mục đúng MỘT bề mặt (panel); h2 của panel chỉ cho trình đọc màn hình, dòng phụ hiện số lượng.
+  Nút phụ trong admin (`.ghost-action`) là nút viền, không tô — một CTA đặc mỗi màn.
+- Đăng nhập admin + nhân viên · Cloudflare Turnstile chế độ Managed, `appearance: always`: ô xác minh LUÔN hiện
+  giữa ô mật khẩu và dòng lỗi, rộng bằng form (khách rủi ro thấp được Cloudflare tự tích, người khác phải bấm). Chưa có token → nút
+  "Đang xác minh…" (khóa); đăng nhập sai → widget tự cấp token mới. Chưa cấu hình khóa → không hiện, không chặn.
+- Nhân viên & phân quyền · nhân viên đăng nhập `/staff?studio=<id>` (tên đăng nhập + mật khẩu, logo studio trên
+  thẻ đăng nhập; trình duyệt nhớ studio). Chủ studio quản lý ở "Nhân viên": thẻ nét đứt "Cổng nhân viên"
+  (link + Copy + Tải QR), danh sách dạng bảng kẻ (tên · @tên đăng nhập · trạng thái · nhóm quyền · lần đăng nhập ·
+  Quyền / Mật khẩu / Khóa / Xóa+Hoàn tác). Sửa quyền: hộp thoại "spec sheet" — mỗi nhóm một khung, mỗi
+  hành động một hàng tick; mẫu nhanh (Lễ tân · Quản lý · Tất cả · Bỏ hết); tick hành động tự tick "Xem".
+  Luật cứng: KHÔNG có quyền thì nút/mục KHÔNG hiện (không làm mờ). Server kiểm tra lại mọi API
+  (`src/permissions.ts` là danh mục duy nhất).
 - Màn chỉnh sửa (`/compose`) · full màn hình điện thoại (100dvh, không cuộn trang): hàng nhóm ở trên,
   nhóm đang chọn ở giữa (phần còn lại của frame bị phủ mờ), chạm ô để mở ô đó tại chỗ;
   khi mở ô, hàng nhóm ẩn và dock công cụ (Ảnh · Bộ lọc · Zoom · Di chuyển) thay chỗ `.flow-bar`.
@@ -149,6 +186,7 @@ to it. Amend intentionally - the file is the rule.
 - Booking surfaces are workbench panels, not marketing cards.
 - Keep the receipt visible near choices; totals update silently.
 - Photos are placeholders until replaced by real booth assets. Never present stock imagery as final studio proof.
+  Room covers are the studio's own uploads; a room without one shows the paper block + door icon, never stock.
 - Headings stay roman; no italic display emphasis.
 - Interactive text never wraps on mobile.
 

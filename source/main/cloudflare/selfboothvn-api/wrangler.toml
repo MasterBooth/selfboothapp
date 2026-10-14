@@ -24,6 +24,9 @@ routes = [
 # Luân chuyển khoá: nối thêm "kid:hex" mới, cách nhau dấu phẩy, giữ kid cũ.
 [vars]
 LICENSE_PUBLIC_KEYS = "lm-2026-01:1b0a0d0283e1fe92ea42c5aae4d37e030eda7668c315c6e069af0e507f76ef62"
+# Turnstile (xác minh người thật ở form đăng nhập admin + nhân viên). Khoá CÔNG KHAI của widget
+# boothme.tech; secret đặt riêng: npx wrangler secret put TURNSTILE_SECRET_KEY. Chỉ bật khi có ĐỦ cả hai.
+TURNSTILE_SITE_KEY = "0x4AAAAAAFT3NIJlNDHb9xbu"
 
 [[r2_buckets]]
 binding = "MEDIA"

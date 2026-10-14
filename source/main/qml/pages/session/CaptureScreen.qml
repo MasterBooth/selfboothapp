@@ -367,11 +367,13 @@ Item {
         onTriggered: root._submitCapture(root._captureFallbackNoAf)
     }
 
+    // Watchdog C++ tự kết nối lại mỗi 10 giây → chờ đủ vài lượt trước khi báo lỗi.
+    // Hết hạn vẫn không sao: khi máy nối lại, onIsConnectedChanged tự chụp tiếp.
     Timer {
         id: cameraDisconnectDeadline
-        interval: 10000
+        interval: 30000
         repeat: false
-        onTriggered: root._setTerminalCameraError("CAMERA_DISCONNECTED", "Mất kết nối máy ảnh quá 10 giây")
+        onTriggered: root._setTerminalCameraError("CAMERA_DISCONNECTED", "Mất kết nối máy ảnh. Đang tự kết nối lại, vui lòng bật máy ảnh...")
     }
 
     Timer {
@@ -760,7 +762,7 @@ Item {
             console.log("CaptureScreen: REMOTE shutter mode ON - waiting for physical shutter")
         } else {
             for (var i = 0; i < root.totalPhotos; i++) {
-                sessionPhotos.append({ "path": "", "captured": false, "realPath": "" })
+                sessionPhotos.append({ "path": "", "captured": false, "realPath": "", "pending": false })
             }
             if (root.sessionId !== "")
                 sessionManager.beginCapture(root.sessionId, root.totalPhotos)
@@ -1028,33 +1030,69 @@ Item {
         var files = eventManager.listSessionPhotoFiles(root.sessionPath, root.sessionId,
                                                        root._captureStartedAt - 2000)
         for (var i = 0; i < files.length; i++) {
-            if (root._hasPhotoPath(files[i]))
+            if (root._hasPhotoPath(files[i]) && root._pendingPhotoIndex(files[i]) < 0)
                 continue
             console.warn("CaptureScreen: photo on disk but never received - adding:", files[i])
             root._appendCapturedPhoto(files[i])
         }
     }
 
+    // Mục đang hiện bản xem trước (pending) của ảnh gốc này; -1 = không có.
+    function _pendingPhotoIndex(p) {
+        var key = root._photoPathKey(p)
+        for (var i = 0; i < sessionPhotos.count; i++) {
+            var item = sessionPhotos.get(i)
+            if (item.pending && root._photoPathKey(item.realPath) === key)
+                return i
+        }
+        return -1
+    }
+
+    // Hot Folder + mirror: hiện ngay bản nhỏ đã lật trong lúc ảnh gốc còn đang lật.
+    // Mục này CHƯA tính là đã chụp (không đếm, không upload, không đưa vào ghép) cho
+    // tới khi imageCaptured của ảnh gốc về (_appendCapturedPhoto chốt lại).
+    function _showPhotoPreview(path, previewPath) {
+        var fp = "file:///" + path.replace(/\\/g, "/")
+        if (root._hasPhotoPath(fp))
+            return
+        var preview = "file:///" + previewPath.replace(/\\/g, "/")
+        sessionPhotos.append({ "path": preview, "captured": false, "realPath": fp, "pending": true })
+        if (root.freeCaptureUntilTimeout)
+            root.totalPhotos = sessionPhotos.count
+        root._setExternalPhoto(sessionPhotos.count - 1, preview)
+        root._lastFileAt = Date.now()
+        photoFlash.restart()
+        console.log("CaptureScreen: [HOT FOLDER] preview shown ->", preview)
+    }
+
     // Chụp tự do / remote: một ảnh mới về (lệnh từ app, nút trên máy, remote, hot folder)
     // → thêm vào cuối danh sách, xếp upload.
     function _appendCapturedPhoto(path) {
         var fp = "file:///" + path.replace(/\\/g, "/")
-        if (root._hasPhotoPath(fp)) {
-            console.warn("CaptureScreen: duplicate photo event ignored:", fp)
-            return
+        var idx = root._pendingPhotoIndex(fp)
+        if (idx >= 0) {
+            // Đã hiện bản xem trước: giữ ảnh nhỏ để hiển thị, chốt ảnh gốc cho ghép/in/upload.
+            sessionPhotos.setProperty(idx, "captured", true)
+            sessionPhotos.setProperty(idx, "pending", false)
+        } else {
+            if (root._hasPhotoPath(fp)) {
+                console.warn("CaptureScreen: duplicate photo event ignored:", fp)
+                return
+            }
+            sessionPhotos.append({ "path": fp, "captured": true, "realPath": fp, "pending": false })
+            idx = sessionPhotos.count - 1
+            if (root.freeCaptureUntilTimeout)
+                root.totalPhotos = sessionPhotos.count
+            root._setExternalPhoto(idx, fp)
+            photoFlash.restart()
         }
-        sessionPhotos.append({ "path": fp, "captured": true, "realPath": fp })
-        if (root.freeCaptureUntilTimeout)
-            root.totalPhotos = sessionPhotos.count
-        root._setExternalPhoto(sessionPhotos.count - 1, fp)
-        root._queueCapturedAsset(sessionPhotos.count - 1, fp)
+        root._queueCapturedAsset(idx, fp)
         root.capturedCount++
         sessionManager.updateCaptureProgress(root.sessionId, root.capturedCount)
-        root.photoReady(fp, sessionPhotos.count)
+        root.photoReady(fp, idx + 1)
         if (root._shutterPendingFiles > 0)
             root._shutterPendingFiles--
         root._lastFileAt = Date.now()
-        photoFlash.restart()
         console.log("CaptureScreen: [" + (root.freeCaptureUntilTimeout ? "FREE" : "REMOTE") + "] photo",
                     root.capturedCount, "->", fp)
     }
@@ -1142,6 +1180,10 @@ Item {
     }
 
     function retryAfterCameraError() {
+        // Máy chưa nối lại → kích kết nối ngay (single-flight, trùng watchdog cũng
+        // không sao); lệnh chụp lỗi trong lúc đang nối sẽ tự thử lại.
+        if (!cameraController.isConnected && !root.hotFolderMode && !root.virtualCaptureMode)
+            cameraController.connectAsync()
         root._captureTerminalError = false
         root._terminalErrorCode = ""
         root._captureRetryMessage = ""
@@ -1306,6 +1348,13 @@ Item {
             // Retake: onImageCaptured handles resume after file arrives
         }
 
+        // Hot Folder + mirror: bản nhỏ đã lật tới trước ảnh gốc → hiện ngay.
+        function onHotFolderPhotoPreview(path, previewPath) {
+            if (!root._appendsPhotos || root.isProcessing || root._captureClosed)
+                return
+            root._showPhotoPreview(path, previewPath)
+        }
+
         // 2. File arrived async �?" update thumbnail, resume pending completion
         function onImageCaptured(path) {
             // Free mode (mode3): anh tu lenh app (chuot/Space) hay remote gan may deu
@@ -1384,6 +1433,16 @@ Item {
                 } else {
                     root.currentPhotoIndex = root.totalPhotos
                 }
+            }
+        }
+
+        // Máy ảnh tự kết nối lại (watchdog) sau khi báo lỗi mất kết nối →
+        // tự chụp tiếp, không bắt nhân viên vào Cài đặt bấm "Kết nối lại".
+        function onIsConnectedChanged() {
+            if (!cameraController.isConnected) return
+            if (root._captureTerminalError && root._terminalErrorCode === "CAMERA_DISCONNECTED") {
+                console.log("CaptureScreen: camera reconnected - resuming capture")
+                root.retryAfterCameraError()
             }
         }
 
@@ -2575,7 +2634,7 @@ Item {
                 anchors.fill: parent
                 source: model.path
                 fillMode: Image.PreserveAspectFit
-                visible: model.captured
+                visible: model.captured || model.pending
                 cache: false
                 asynchronous: true
                 sourceSize: Qt.size(320, 280)
@@ -2584,7 +2643,7 @@ Item {
             // Placeholder chưa chụp �?" ô s�' mờ.
             Rectangle {
                 anchors.fill: parent
-                visible: !model.captured
+                visible: !model.captured && !model.pending
                 color: "#eef0f3"
                 radius: 8
                 Text {

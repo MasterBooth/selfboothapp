@@ -1,5 +1,25 @@
 [
   {
+    "date": "2026-10-11",
+    "scope": "component",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "none (studio-uploaded room covers)",
+    "nav": "unchanged",
+    "footer": "none",
+    "brief": "Room covers + edit in place (admin Phòng chụp) · room-first public booking: room rows → room page → package rows → day/time/note · sign-in dialog at booking"
+  },
+  {
+    "date": "2026-10-11",
+    "scope": "app",
+    "macrostructure": "Workbench",
+    "theme": "Studio",
+    "enrichment": "none",
+    "nav": "Grouped side rail (Vận hành · Thiết lập · Studio) / phone tab bar",
+    "footer": "none",
+    "brief": "Admin shell redesign + staff portal /staff + staff accounts with per-action permission sheet"
+  },
+  {
     "date": "2026-10-05",
     "scope": "component",
     "macrostructure": "Workbench",

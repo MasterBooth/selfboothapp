@@ -77,11 +77,17 @@ public:
 private:
     void notify(CameraEvent event);
     void wireCallbacks(ICamera* camera);
+    void markSessionLost(const char* reason);
+    void releaseCamera();
     std::string saveStill(const ImageFrame& frame);
 
     mutable std::mutex m_mutex;
     std::unique_ptr<CameraManager> m_manager;
-    std::unique_ptr<ICamera> m_camera;
+    // shared_ptr: luồng UI (start/stop live view) và m_camPool (connect/chụp) cùng
+    // dùng máy ảnh. Mỗi lời gọi giữ một bản sao để releaseCamera() ở luồng khác
+    // không huỷ đối tượng giữa chừng (use-after-free). Sau close() handle = null
+    // nên lời gọi muộn chỉ trả false.
+    std::shared_ptr<ICamera> m_camera;
     std::vector<FujiCameraInfo> m_detected;
     std::vector<ICameraEventListener*> m_listeners;
     std::function<void(const uint8_t*, size_t)> m_liveViewFrameCallback;
@@ -99,6 +105,10 @@ private:
     long m_liveViewSize = 0; // auto/native
     long m_liveViewMode = SDK_LIVEVIEW_MODE1;
     std::atomic<uint64_t> m_savedSeq{0};
+    // Máy ngủ / tắt / rút cáp: SDK báo lỗi Communication nhưng handle vẫn còn
+    // → isOpen() vẫn true. Cờ này cho isConnected() trả false để watchdog của
+    // CameraController tự kết nối lại. Reset khi mở phiên mới.
+    std::atomic<bool> m_sessionLost{false};
 };
 
 bool FujiCameraController::Impl::initialize()
@@ -119,7 +129,7 @@ bool FujiCameraController::Impl::initialize()
 
 void FujiCameraController::Impl::shutdown()
 {
-    std::unique_ptr<ICamera> camera;
+    std::shared_ptr<ICamera> camera;
     std::unique_ptr<CameraManager> manager;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -132,11 +142,13 @@ void FujiCameraController::Impl::shutdown()
     }
 
     if (camera) {
+        // close() dừng poll thread TRƯỚC — poll thread gọi các callback này, gán
+        // nullptr trong lúc nó đang gọi là data race trên std::function.
+        camera->close();
         camera->onLiveFrame = nullptr;
         camera->onImage = nullptr;
         camera->onError = nullptr;
         camera->onDisconnected = nullptr;
-        camera->close();
     }
     if (manager) manager->shutdown();
 }
@@ -145,6 +157,11 @@ bool FujiCameraController::Impl::findCameras(std::vector<FujiCameraInfo>& outCam
 {
     outCameras.clear();
     if (!initialize()) return false;
+
+    // Phiên cũ đã chết (máy ngủ/tắt) nhưng handle còn mở → đóng hẳn để
+    // XSDK_Detect thấy lại máy khi được bật lên.
+    if (m_sessionLost.load())
+        releaseCamera();
 
     std::vector<std::string> cameras;
     {
@@ -167,7 +184,11 @@ bool FujiCameraController::Impl::connectCamera(int cameraIndex)
 {
     if (!initialize()) return false;
 
-    std::unique_ptr<ICamera> camera;
+    // Đóng phiên cũ (nếu còn) NGOÀI m_mutex: close() join poll thread, mà poll
+    // thread có thể đang trong callback cần m_mutex.
+    releaseCamera();
+
+    std::shared_ptr<ICamera> camera;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (!m_manager) {
@@ -184,6 +205,7 @@ bool FujiCameraController::Impl::connectCamera(int cameraIndex)
         wireCallbacks(camera.get());
         camera->setLiveViewOptions(m_liveViewQuality, m_liveViewSize, m_liveViewMode);
         m_camera = std::move(camera);
+        m_sessionLost.store(false);
     }
 
     CameraEvent event;
@@ -193,9 +215,9 @@ bool FujiCameraController::Impl::connectCamera(int cameraIndex)
     return true;
 }
 
-bool FujiCameraController::Impl::disconnectCamera()
+void FujiCameraController::Impl::releaseCamera()
 {
-    std::unique_ptr<ICamera> camera;
+    std::shared_ptr<ICamera> camera;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         camera = std::move(m_camera);
@@ -204,12 +226,19 @@ bool FujiCameraController::Impl::disconnectCamera()
     }
 
     if (camera) {
+        // Dừng poll thread (close) trước rồi mới gỡ callback — xem shutdown().
+        camera->close();
         camera->onLiveFrame = nullptr;
         camera->onImage = nullptr;
         camera->onError = nullptr;
         camera->onDisconnected = nullptr;
-        camera->close();
     }
+}
+
+bool FujiCameraController::Impl::disconnectCamera()
+{
+    releaseCamera();
+    m_sessionLost.store(false);
 
     CameraEvent event;
     event.type = CameraEventType::Disconnected;
@@ -221,12 +250,30 @@ bool FujiCameraController::Impl::disconnectCamera()
 bool FujiCameraController::Impl::isConnected() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    return m_camera && m_camera->isOpen();
+    return m_camera && m_camera->isOpen() && !m_sessionLost.load();
+}
+
+void FujiCameraController::Impl::markSessionLost(const char* reason)
+{
+    // Poll thread gọi lại mỗi vòng khi mất kết nối → chỉ báo một lần.
+    if (m_sessionLost.exchange(true))
+        return;
+
+    Logger::instance().warn("FujiCtrl", "session lost (%s) - waiting for auto reconnect", reason);
+    {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_liveViewActive = false;
+        m_liveViewStreaming = false;
+    }
+    CameraEvent event;
+    event.type = CameraEventType::Disconnected;
+    event.message = "FUJIFILM camera disconnected";
+    notify(event);
 }
 
 bool FujiCameraController::Impl::takePhoto()
 {
-    ICamera* camera = nullptr;
+    std::shared_ptr<ICamera> camera;
     bool remoteMode = false;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -236,7 +283,7 @@ bool FujiCameraController::Impl::takePhoto()
                                     m_remoteShutterMode ? 1 : 0);
             return false;
         }
-        camera = m_camera.get();
+        camera = m_camera;
         remoteMode = m_remoteShutterMode;
     }
 
@@ -259,7 +306,7 @@ bool FujiCameraController::Impl::takePhoto()
 
 bool FujiCameraController::Impl::takePhotoNoAF()
 {
-    ICamera* camera = nullptr;
+    std::shared_ptr<ICamera> camera;
     bool remoteMode = false;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
@@ -269,7 +316,7 @@ bool FujiCameraController::Impl::takePhotoNoAF()
                                     m_remoteShutterMode ? 1 : 0);
             return false;
         }
-        camera = m_camera.get();
+        camera = m_camera;
         remoteMode = m_remoteShutterMode;
     }
 
@@ -315,12 +362,12 @@ void FujiCameraController::Impl::setLiveViewOptions(const std::string& size, con
     else if (normalizedQuality == "basic")
         sdkQuality = SDK_LIVEVIEW_QUALITY_BASIC;
 
-    ICamera* camera = nullptr;
+    std::shared_ptr<ICamera> camera;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         m_liveViewSize = sdkSize;
         m_liveViewQuality = sdkQuality;
-        camera = m_camera.get();
+        camera = m_camera;
     }
 
     if (camera)
@@ -329,14 +376,14 @@ void FujiCameraController::Impl::setLiveViewOptions(const std::string& size, con
 
 bool FujiCameraController::Impl::startLiveView()
 {
-    ICamera* camera = nullptr;
+    std::shared_ptr<ICamera> camera;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
         if (!m_camera || !m_camera->isOpen()) {
             setLastError("FUJIFILM camera is not connected");
             return false;
         }
-        camera = m_camera.get();
+        camera = m_camera;
         camera->setLiveViewOptions(m_liveViewQuality, m_liveViewSize, m_liveViewMode);
     }
 
@@ -358,10 +405,10 @@ bool FujiCameraController::Impl::startLiveView()
 
 bool FujiCameraController::Impl::stopLiveView()
 {
-    ICamera* camera = nullptr;
+    std::shared_ptr<ICamera> camera;
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        camera = m_camera.get();
+        camera = m_camera;
     }
     if (camera) camera->stopLiveView();
 
@@ -505,7 +552,7 @@ void FujiCameraController::Impl::wireCallbacks(ICamera* camera)
         notify(event);
     };
 
-    camera->onError = [this](CameraError, const std::string& message) {
+    camera->onError = [this](CameraError err, const std::string& message) {
         {
             std::lock_guard<std::mutex> lock(m_mutex);
             setLastError(message);
@@ -514,18 +561,14 @@ void FujiCameraController::Impl::wireCallbacks(ICamera* camera)
         event.type = CameraEventType::CaptureError;
         event.message = message;
         notify(event);
+
+        // Lệnh chụp lỗi giao tiếp = máy đã ngủ/tắt → coi như mất phiên.
+        if (err == CameraError::Communication)
+            markSessionLost("capture communication error");
     };
 
     camera->onDisconnected = [this] {
-        {
-            std::lock_guard<std::mutex> lock(m_mutex);
-            m_liveViewActive = false;
-            m_liveViewStreaming = false;
-        }
-        CameraEvent event;
-        event.type = CameraEventType::Disconnected;
-        event.message = "FUJIFILM camera disconnected";
-        notify(event);
+        markSessionLost("poll communication error");
     };
 }
 

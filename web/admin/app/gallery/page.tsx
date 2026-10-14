@@ -33,6 +33,7 @@ import { syncComposed } from "../compose/composedPrints";
 import { useSessionPhotos } from "../compose/sessionPhotos";
 import { Thumb } from "../compose/thumbs";
 import { countComposed, loadUploads, pruneUploads, removeUpload, saveUploads, uploadScope } from "../compose/uploads";
+import { canShareFiles, fetchBatch, isIos, shareBatches } from "./saveAll";
 
 type ProgressState = {
   open: boolean;
@@ -41,6 +42,19 @@ type ProgressState = {
   current: number;
   total: number;
 };
+
+/** A batch of originals fetched on iOS, waiting for the guest's tap to open the share sheet. */
+type ShareStep = {
+  files: File[];
+  part: number;
+  parts: number;
+  done: number;
+  total: number;
+  note: string;
+  busy: boolean;
+};
+
+type ShareResult = "done" | "aborted" | "failed" | "stop";
 
 export default function GalleryPage() {
   const [ctx, setCtx] = useState<FlowContext | null>(null);
@@ -54,6 +68,10 @@ export default function GalleryPage() {
   const [unlockError, setUnlockError] = useState("");
   const [active, setActive] = useState<number | null>(null);
   const [progress, setProgress] = useState<ProgressState>({ open: false, title: "", detail: "", current: 0, total: 0 });
+  const [savingToPhotos, setSavingToPhotos] = useState(false);
+  const [shareStep, setShareStep] = useState<ShareStep | null>(null);
+  const shareTap = useRef<((result: ShareResult) => void) | null>(null);
+  const shareAbort = useRef<AbortController | null>(null);
   const localUrls = useRef<string[]>([]);
 
   useEffect(() => {
@@ -97,6 +115,7 @@ export default function GalleryPage() {
   useEffect(() => () => {
     localUrls.current.forEach((url) => URL.revokeObjectURL(url));
     localUrls.current = [];
+    shareAbort.current?.abort();
   }, []);
 
   // Booth collages live on the "Ảnh đã ghép" page, not in the photo grid.
@@ -136,15 +155,81 @@ export default function GalleryPage() {
     if (!silent) window.setTimeout(() => setProgress((current) => ({ ...current, open: false })), 900);
   };
 
+  /**
+   * iPhone / iPad: fetch the originals a batch at a time and save each batch to Photos
+   * through the share sheet, opened by the guest's tap (Safari blocks it otherwise).
+   */
+  const saveAllToPhotos = async (list: CaptureAsset[]) => {
+    const controller = new AbortController();
+    shareAbort.current = controller;
+    setSavingToPhotos(true);
+    const batches = shareBatches(list);
+    let done = 0;
+    let failed = 0;
+    try {
+      for (const [part, batch] of batches.entries()) {
+        const start = done;
+        const { files, failed: missing } = await fetchBatch(batch, start, controller.signal, () => {
+          done++;
+          setProgress({ open: true, title: "Đang chuẩn bị ảnh gốc", detail: `Ảnh ${done}/${list.length}`, current: done, total: list.length });
+        });
+        failed += missing;
+        if (files.length === 0) continue;
+        let note = "";
+        for (;;) {
+          setShareStep({ files, part: part + 1, parts: batches.length, done, total: list.length, note, busy: false });
+          const result = await new Promise<ShareResult>((resolve) => { shareTap.current = resolve; });
+          if (result === "stop") return;
+          if (result === "done") break;
+          note = result === "aborted"
+            ? "Bảng lưu đã đóng. Bấm lưu lại để không sót ảnh."
+            : "Không mở được bảng lưu ảnh. Bấm thử lại.";
+        }
+        setShareStep(null);
+      }
+    } catch {
+      if (!controller.signal.aborted) setError("Không tải được ảnh. Kiểm tra mạng rồi thử lại.");
+    } finally {
+      shareTap.current = null;
+      shareAbort.current = null;
+      setShareStep(null);
+      setSavingToPhotos(false);
+      if (failed > 0) setError(`Không tải được ${failed} ảnh. Hãy tải riêng từng ảnh bằng nút Tải.`);
+    }
+  };
+
+  /** Must run straight from the tap: Safari only opens the share sheet inside a user gesture. */
+  const shareCurrentBatch = () => {
+    const resolve = shareTap.current;
+    if (!shareStep || shareStep.busy || !resolve) return;
+    setShareStep({ ...shareStep, busy: true });
+    navigator.share({ files: shareStep.files }).then(
+      () => resolve("done"),
+      (err: Error) => resolve(err?.name === "AbortError" ? "aborted" : "failed"),
+    );
+  };
+
+  const stopSaveAll = () => {
+    shareAbort.current?.abort();
+    shareTap.current?.("stop");
+  };
+
   const downloadAll = async () => {
     if (downloadingAll) return;
     setDownloadingAll(true);
+    setError("");
     setProgress({ open: true, title: "Đang tải ảnh", detail: "Chuẩn bị danh sách ảnh", current: 0, total: Math.max(1, photoTotal + uploadedAssets.length) });
-    let allAssets = galleryAssets;
+    let closeAfter = 900;
     try {
       // Waits for pages still loading, and takes fresh links if the page was left open.
       const list = await session.freshAssets();
-      allAssets = [...list.filter((asset) => asset.kind !== "collage"), ...uploadedAssets];
+      const allAssets = [...list.filter((asset) => asset.kind !== "collage"), ...uploadedAssets];
+      if (isIos() && canShareFiles()) {
+        closeAfter = 0;
+        await saveAllToPhotos(allAssets);
+        return;
+      }
+      closeAfter = Math.max(900, allAssets.length * 120 + 500);
       allAssets.forEach((asset, index) => {
         window.setTimeout(() => {
           setProgress({ open: true, title: "Đang tải ảnh", detail: assetLabel(asset, index), current: index + 1, total: allAssets.length });
@@ -155,7 +240,7 @@ export default function GalleryPage() {
       window.setTimeout(() => {
         setDownloadingAll(false);
         setProgress((current) => ({ ...current, open: false }));
-      }, Math.max(900, allAssets.length * 120 + 500));
+      }, closeAfter);
     }
   };
 
@@ -332,7 +417,23 @@ export default function GalleryPage() {
         </div>
       )}
 
-      {progress.open ? (
+      {shareStep ? (
+        <div className="progress-dialog" role="dialog" aria-modal="true" aria-label="Lưu ảnh vào máy">
+          <div className="progress-panel">
+            <h2>{shareStep.parts > 1 ? `Lưu ảnh · phần ${shareStep.part}/${shareStep.parts}` : "Ảnh đã sẵn sàng"}</h2>
+            <p>{shareStep.note || "Bấm nút bên dưới, rồi chọn \"Lưu hình ảnh\" để ảnh vào thư viện Ảnh."}</p>
+            <progress max={shareStep.total || 1} value={shareStep.done} />
+            <span>{shareStep.done}/{shareStep.total}</span>
+            <div className="progress-actions">
+              <button className="primary-action" disabled={shareStep.busy} onClick={shareCurrentBatch} type="button">
+                <Download size={18} />
+                Lưu {shareStep.files.length} ảnh vào máy
+              </button>
+              <button className="text-action" onClick={stopSaveAll} type="button">Dừng</button>
+            </div>
+          </div>
+        </div>
+      ) : progress.open ? (
         <div className="progress-dialog" role="dialog" aria-modal="true" aria-label={progress.title}>
           <div className="progress-panel">
             <Loader2 size={24} />
@@ -340,6 +441,11 @@ export default function GalleryPage() {
             <p>{progress.detail}</p>
             <progress max={progress.total || 1} value={progress.current} />
             <span>{progress.current}/{progress.total || 1}</span>
+            {savingToPhotos ? (
+              <div className="progress-actions">
+                <button className="text-action" onClick={stopSaveAll} type="button">Dừng</button>
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

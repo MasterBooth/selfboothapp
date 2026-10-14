@@ -9,6 +9,7 @@
 #include <QAtomicInt>
 #include <QImage>
 #include <QThreadPool>
+#include <QMap>
 #include <memory>
 #include <thread>
 #include <mutex>
@@ -26,6 +27,7 @@ class CameraEventBridge;
 class WebcamLiveView;
 class HotFolderWatcher;
 class FujiHotFolderProcess;
+class FujiTetherAppProcess;
 class EventManager;
 class QSettings;
 
@@ -54,10 +56,13 @@ class CameraController : public QObject
 
     // === CAPTURE SOURCE ("sdk" = điều khiển máy qua SDK, "hotfolder" = nhận ảnh từ thư mục) ===
     Q_PROPERTY(QString captureSource READ captureSource NOTIFY captureSourceChanged)
-    Q_PROPERTY(QString hotFolderKind READ hotFolderKind NOTIFY hotFolderKindChanged)       // "folder" | "fuji"
+    Q_PROPERTY(QString hotFolderKind READ hotFolderKind NOTIFY hotFolderKindChanged)       // "folder" | "fuji" | "tether"
     Q_PROPERTY(QString hotFolderPath READ hotFolderPath NOTIFY hotFolderPathChanged)
     // idle · watching · folder_missing · folder_unset · fuji_exe_missing · fuji_starting · fuji_stopped
+    // · tether_exe_missing · tether_starting · tether_stopped
     Q_PROPERTY(QString hotFolderState READ hotFolderState NOTIFY hotFolderStateChanged)
+    // Đường dẫn FUJIFILM_TetherApp.exe sẽ dùng (rỗng = không tìm thấy).
+    Q_PROPERTY(QString tetherAppExePath READ tetherAppExePath NOTIFY tetherAppExePathChanged)
 
     // === Live View Properties ===
     Q_PROPERTY(QUrl liveViewSource READ liveViewSource NOTIFY liveViewSourceChanged)
@@ -67,6 +72,7 @@ class CameraController : public QObject
     Q_PROPERTY(bool useWebcamLiveView READ useWebcamLiveView NOTIFY useWebcamLiveViewChanged)
     Q_PROPERTY(QStringList webcamList READ webcamList NOTIFY webcamListChanged)
     Q_PROPERTY(int selectedWebcamIndex READ selectedWebcamIndex NOTIFY selectedWebcamIndexChanged)
+    Q_PROPERTY(bool webcamScanning READ webcamScanning NOTIFY webcamScanningChanged)
 
     // === MIRROR MODE ===
     Q_PROPERTY(bool mirrorMode READ mirrorMode WRITE setMirrorMode NOTIFY mirrorModeChanged)
@@ -127,7 +133,11 @@ public:
     Q_INVOKABLE void setHotFolderKind(const QString &kind);
     // Thư mục cho kiểu "folder" (nhận cả URL file:///).
     Q_INVOKABLE void setHotFolderFolder(const QString &path);
+    // Mở lại app nhận ảnh của kiểu hiện tại (HotFolder.exe hoặc Tether App).
     Q_INVOKABLE void relaunchFujiHotFolder();
+    QString tetherAppExePath() const;
+    // Người dùng chọn exe Tether App (nhận cả URL file:///); rỗng = tự tìm.
+    Q_INVOKABLE void setTetherAppExePath(const QString &path);
     // CaptureScreen bật khi bắt đầu chụp, tắt khi xong — chỉ nhận ảnh trong lúc này.
     Q_INVOKABLE void setHotFolderArmed(bool armed);
     // Hot folder còn ảnh đang về: file đang được ghi dở, hoặc đã ghi xong nhưng còn
@@ -151,8 +161,15 @@ public:
     // === WEBCAM LIVE VIEW ===
     bool useWebcamLiveView() const { return m_useWebcamLiveView; }
     QStringList webcamList() const { return m_webcamList; }
+    // Index DirectShow của thiết bị đang chọn (KHÔNG phải vị trí trong webcamList).
     int selectedWebcamIndex() const { return m_selectedWebcamIndex; }
-    Q_INVOKABLE QStringList scanWebcams();
+    bool webcamScanning() const { return m_webcamScanning; }
+    // Quét ở luồng nền (mở thử từng thiết bị mất vài giây) → không treo UI.
+    // Kết quả qua webcamListChanged + webcamScanFinished.
+    Q_INVOKABLE void scanWebcams();
+    // webcamList chỉ chứa thiết bị đọc được → vị trí trong list ≠ index thiết bị.
+    Q_INVOKABLE int webcamDeviceAt(int listIndex) const;
+    Q_INVOKABLE int webcamListIndexOf(int deviceIndex) const;
     Q_INVOKABLE bool startWebcamLiveView(int deviceIndex);
     Q_INVOKABLE void stopWebcamLiveView();
     Q_INVOKABLE void setUseWebcamLiveView(bool use);
@@ -265,6 +282,7 @@ signals:
     void hotFolderKindChanged();
     void hotFolderPathChanged();
     void hotFolderStateChanged();
+    void tetherAppExePathChanged();
     // Emitted when connectAsync() finishes: success=true means camera opened OK.
     void connectFinished(bool success);
 
@@ -282,6 +300,8 @@ signals:
     void useWebcamLiveViewChanged();
     void webcamListChanged();
     void selectedWebcamIndexChanged();
+    void webcamScanningChanged();
+    void webcamScanFinished(int count);
 
     // Mirror Mode
     void mirrorModeChanged(bool enabled);
@@ -293,6 +313,9 @@ signals:
     void error(const QString &message);
     void captureCompleted();
     void imageCaptured(const QString &path);
+    // Hot Folder + mirror: bản nhỏ đã lật (chỉ để hiển thị) có trước khi ảnh gốc
+    // lật xong. imageCaptured(path) cùng path vẫn đến sau như thường.
+    void hotFolderPhotoPreview(const QString &path, const QString &previewPath);
     void statusMessage(const QString &message);
 
     // Camera property signals
@@ -352,8 +375,9 @@ private:
     // ── Hot Folder ───────────────────────────────────────────────────────────
     void enterHotFolder();
     void leaveHotFolder();                 // về "sdk", KHÔNG tự kết nối (người gọi quyết)
-    void startHotFolder();                 // mở Fuji (nếu cần) + theo dõi thư mục
-    void stopHotFolder(bool closeFujiApp); // dừng theo dõi (+ tắt HotFolder.exe)
+    void startHotFolder();                 // mở app Fuji (nếu cần) + theo dõi thư mục
+    // Dừng theo dõi; closeApp = tắt app nhận ảnh của kiểu HIỆN TẠI (HotFolder.exe / Tether App).
+    void stopHotFolder(bool closeApp);
     void releaseSdkForHotFolder();         // dừng live view SDK + ngắt máy trên m_camPool
     void restoreLiveViewSourceAfterHotFolder();
     void refreshHotFolderState();
@@ -361,6 +385,10 @@ private:
     void onHotFolderFileReady(const QString &path);
     HotFolderWatcher     *m_hotFolderWatcher = nullptr;
     FujiHotFolderProcess *m_fujiHotFolder = nullptr;
+    FujiTetherAppProcess *m_tetherApp = nullptr;
+    QString m_tetherAppExe;               // exe người dùng chọn (rỗng = tự tìm)
+    bool    m_tetherStarting = false;     // đang đóng app cũ / ghi registry / mở Tether App
+    bool    m_tetherLaunchFailed = false;
     QString m_captureSource = "sdk";
     QString m_hotFolderKind = "folder";
     QString m_hotFolderFolder;            // thư mục người dùng chọn (kiểu "folder")
@@ -369,10 +397,25 @@ private:
     bool    m_hotFolderReady = false;
     bool    m_fujiLaunchFailed = false;
     bool    m_fujiStarting = false;       // đã mở exe, chờ app Fuji qua màn splash
-    // Di chuyển + lật ảnh hot folder tuần tự (1 luồng) → ảnh vào phiên đúng thứ tự.
+    // Di chuyển + lật ảnh hot folder song song (2 luồng); imageCaptured vẫn phát
+    // đúng thứ tự chụp nhờ số thứ tự — xem finishHotFolderImport().
     QThreadPool m_hotFolderPool;
     // Ảnh hot folder đã nhận nhưng chưa phát imageCaptured (chỉ đụng trên main thread).
     int m_hotFolderImporting = 0;
+    struct HotFolderResult {
+        QString dest;            // rỗng = chuyển ảnh thất bại
+        QString failedSource;
+    };
+    quint64 m_hotFolderNextSeq = 0;   // số thứ tự cấp cho ảnh mới
+    quint64 m_hotFolderEmitSeq = 0;   // ảnh kế tiếp được phát imageCaptured
+    QMap<quint64, HotFolderResult> m_hotFolderDone;
+    void finishHotFolderImport(quint64 seq, const QString &dest, const QString &failedSource);
+    // Bản xem trước cũng phát theo thứ tự chụp; ảnh đã phát imageCaptured thì bỏ qua.
+    quint64 m_hotFolderPreviewSeq = 0;
+    QMap<quint64, QPair<QString, QString>> m_hotFolderPreviewsReady;   // seq → (dest, preview)
+    void flushHotFolderPreviews();
+    // <thư mục ảnh>/.display/<tên>_live.jpg — cạnh dài ~1600px, chất lượng 90.
+    static QString writeLivePreview(const QString &photoPath, bool mirror);
     void finishConnectAttempt(const QString& requestedType, bool ok);
     void stopSdkLiveViewForReconnect(ICameraSDK& camera);
     void adoptConnectedCameraType(const QString& actualType, const QString& requestedType);
@@ -384,7 +427,11 @@ private:
     std::unique_ptr<WebcamLiveView> m_webcamLiveView;
     bool        m_useWebcamLiveView    = false;
     QStringList m_webcamList;
+    QList<int>  m_webcamDevices;               // song song với m_webcamList
     int         m_selectedWebcamIndex  = -1;
+    bool        m_webcamScanning       = false;
+    // Thiết bị cần chạy lại sau khi quét xong (-1 = không).
+    int         m_webcamResumeIndex    = -1;
 
     // Connection state
     bool m_isConnected = false;
@@ -448,6 +495,10 @@ private:
     // Throttle log "No cameras found" của watchdog để không spam mỗi 5s khi
     // chưa cắm máy. Chỉ log lần đầu mỗi đợt mất kết nối.
     bool m_watchdogLoggedDisconnect = false;
+    // Khi mất kết nối: thử kết nối lại ngay lần đầu, sau đó cách nhau
+    // m_reconnectIntervalMs (mỗi lần thử có thể mất vài giây dò USB).
+    qint64 m_lastReconnectAttemptMs = 0;
+    int m_reconnectIntervalMs = 10000;
 
     // ── Keep-alive chủ động (Canon) ──────────────────────────────────────────
     // Watchdog (5s) gửi ExtendShutDownTimer mỗi m_keepAliveIntervalMs khi máy
